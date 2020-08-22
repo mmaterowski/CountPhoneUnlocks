@@ -6,10 +6,13 @@
         android:name="io.flutter.app.FlutterApplication"
         android:icon="@mipmap/ic_launcher"
         android:label="flutterhello">
-        <service
-            android:name=".Receiver"
-            android:enabled="true"
-            android:exported="true"></service>
+
+        <receiver android:name=".UserPresentBroadcastReceiver">
+            <intent-filter>
+                <action android:name="android.intent.action.USER_PRESENT" />
+                <action android:name="android.intent.action.ACTION_SHUTDOWN" />
+            </intent-filter>
+        </receiver>
 
         <activity
             android:name=".MainActivity"

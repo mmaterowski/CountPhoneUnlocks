@@ -52,15 +52,15 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  static const platform = const MethodChannel('samples.flutter.dev/battery');
+  static const platform = const MethodChannel('UserActiveChannel');
 // Get battery level.
   String _batteryLevel = 'Unknown battery level.';
 
   Future<void> _getBatteryLevel() async {
     String batteryLevel;
     try {
-      final int result = await platform.invokeMethod('getBatteryLevel');
-      batteryLevel = 'Battery level at $result % .';
+      var result = await platform.invokeMethod('getCount');
+      batteryLevel = result.toString();
     } on PlatformException catch (e) {
       batteryLevel = "Failed to get battery level: '${e.message}'.";
     }
@@ -68,6 +68,10 @@ class _MyHomePageState extends State<MyHomePage> {
     setState(() {
       _batteryLevel = batteryLevel;
     });
+  }
+
+  void _printError(error) {
+    print(error);
   }
 
   int _counter = 0;
