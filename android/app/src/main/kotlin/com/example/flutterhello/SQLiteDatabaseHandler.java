@@ -1,5 +1,6 @@
 package com.example.flutterhello;
 
+import java.time.LocalDateTime;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -8,6 +9,10 @@ import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
+import android.os.Build;
+import android.widget.Toast;
+
+import androidx.annotation.RequiresApi;
 
 public class SQLiteDatabaseHandler extends SQLiteOpenHelper {
 
@@ -93,7 +98,7 @@ public class SQLiteDatabaseHandler extends SQLiteOpenHelper {
         return players;
     }
 
-    public void addPlayer(Player player) {
+    private void addPlayer(Player player) {
         SQLiteDatabase db = this.getWritableDatabase();
         ContentValues values = new ContentValues();
         values.put(KEY_NAME, player.getName());
@@ -119,6 +124,16 @@ public class SQLiteDatabaseHandler extends SQLiteOpenHelper {
         db.close();
 
         return i;
+    }
+
+    @RequiresApi(api = Build.VERSION_CODES.O)
+    public void addRecordToDb() {
+        Player player = new Player();
+        Integer Min = 2;
+        Integer Max = 2000;
+        player.setId(Min + (int) (Math.random() * ((Max - Min) + 1)));
+        player.setName(LocalDateTime.now().toString());
+        this.addPlayer(player);
     }
 }
 
