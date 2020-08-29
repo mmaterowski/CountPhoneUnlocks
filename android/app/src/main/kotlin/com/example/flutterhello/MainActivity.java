@@ -1,9 +1,8 @@
 package com.example.flutterhello;
 
-import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
-import android.content.IntentFilter;
+import android.os.Build;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -66,11 +65,13 @@ public final class MainActivity extends FlutterActivity {
     public void configureFlutterEngine(@NonNull @NotNull FlutterEngine flutterEngine) {
         super.configureFlutterEngine(flutterEngine);
         Toast.makeText(this, "rejestruje", Toast.LENGTH_LONG).show();
-        IntentFilter intenFilter = new IntentFilter(Intent.CATEGORY_DEFAULT);
-        intenFilter.addAction(Intent.ACTION_USER_PRESENT);
-        intenFilter.addAction(Intent.ACTION_BOOT_COMPLETED);
-        intenFilter.addAction(Intent.ACTION_SCREEN_ON);
-        this.registerReceiver((BroadcastReceiver) (new UserPresentBroadcastReceiver()), intenFilter);
+
+        actionOnService(Actions.START);
+
+//        IntentFilter intenFilter = new IntentFilter(Intent.CATEGORY_DEFAULT);
+//        intenFilter.addAction(Intent.ACTION_BOOT_COMPLETED);
+//        intenFilter.addAction(Intent.ACTION_SCREEN_ON);
+//        this.registerReceiver((BroadcastReceiver) (new UserPresentBroadcastReceiver()), intenFilter);
         this.db = new SQLiteDatabaseHandler((Context) this);
         DartExecutor dartExecutor = flutterEngine.getDartExecutor();
         (new MethodChannel(dartExecutor.getBinaryMessenger(), "UserActiveChannel")).setMethodCallHandler((MethodCallHandler) (new MethodCallHandler() {
@@ -81,6 +82,19 @@ public final class MainActivity extends FlutterActivity {
             }
         }));
     }
+
+    private void actionOnService(Actions action) {
+        if (new Utils().getServiceState(this) == ServiceState.STOPPED && action == Actions.STOP)
+            return;
+
+        Intent startServiceIntent = new Intent(this, EndlessService.class);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            startForegroundService(startServiceIntent);
+        } else {
+            startService(startServiceIntent);
+        }
+    }
+
 
     @NotNull
     public final String getCount() {

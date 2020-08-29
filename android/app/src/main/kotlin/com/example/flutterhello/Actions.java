@@ -1,4 +1,6 @@
 package com.example.flutterhello;
 
-public enum ACti {
+public enum Actions {
+    START,
+    STOP
 }

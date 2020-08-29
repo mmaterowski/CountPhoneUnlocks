@@ -5,7 +5,6 @@ import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.Service;
-import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
@@ -13,16 +12,14 @@ import android.graphics.Color;
 import android.os.Build;
 import android.os.IBinder;
 import android.os.PowerManager;
-import android.provider.Settings;
-import android.util.Log;
 import android.widget.Toast;
 
 import java.util.Random;
 
-public class ForegroundService extends Service {
+public class EndlessService extends Service {
     private static final String TAG = "MyService";
     private static final PowerManager.WakeLock wakeLock = null;
-    private static ForegroundService instance = null;
+    private static EndlessService instance = null;
     private static boolean isServiceStarted = false;
 
     public static boolean isInstanceCreated() {

@@ -10,10 +10,10 @@
         <receiver android:name=".UserPresentBroadcastReceiver" android:enabled="true" android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.BOOT_COMPLETED" />
+                <action android:name="android.intent.action.ACTION_USER_PRESENT" />
             </intent-filter>
         </receiver>
-
-
+        <service android:name=".EndlessService"/>
 
         <activity
             android:name=".MainActivity"
@@ -58,5 +58,8 @@
             android:value="2" />
     </application>
        <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE"></uses-permission>
+    <uses-permission android:name="android.permission.INTERNET"></uses-permission>
+    <uses-permission android:name="android.permission.WAKE_LOCK" />
 
 </manifest>
