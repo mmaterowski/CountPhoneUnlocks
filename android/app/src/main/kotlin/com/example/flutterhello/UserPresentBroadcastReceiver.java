@@ -18,10 +18,6 @@ public class UserPresentBroadcastReceiver extends BroadcastReceiver {
         //this also
         actOnBootCompleted(context, intent);
 
-        //this is not working properly
-//        if (startServiceIfNotRunning(context, intent)) {
-//            return;
-//        }
 
         if (intent.getAction().equals(Intent.ACTION_USER_PRESENT)) {
             SQLiteDatabaseHandler db = new SQLiteDatabaseHandler(context);
@@ -35,10 +31,14 @@ public class UserPresentBroadcastReceiver extends BroadcastReceiver {
         if (Intent.ACTION_BOOT_COMPLETED.equals(intent.getAction())) {
             Toast.makeText(context, "boot completed wjechalooo", Toast.LENGTH_LONG).show();
             Intent startServiceIntent = new Intent(context, EndlessService.class);
-            context.startService(startServiceIntent);
+            context.startForegroundService(startServiceIntent);
             Log.i("Autostart", "started");
         }
     }
+
+
+
+
 
 //    @RequiresApi(api = Build.VERSION_CODES.O)
 //    private boolean startServiceIfNotRunning(Context context, Intent intent) {

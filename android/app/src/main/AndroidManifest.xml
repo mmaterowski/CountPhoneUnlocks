@@ -1,19 +1,25 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.example.flutterhello">
+    package="com.example.flutterhello" android:installLocation="internalOnly" >
+
+    <uses-sdk android:minSdkVersion="26" />
 
     <application
         android:name="io.flutter.app.FlutterApplication"
         android:icon="@mipmap/ic_launcher"
         android:label="flutterhello">
 
-        <receiver android:name=".UserPresentBroadcastReceiver" android:enabled="true" android:exported="true">
+
+        <receiver
+            android:name=".UserPresentBroadcastReceiver">
             <intent-filter>
                 <action android:name="android.intent.action.BOOT_COMPLETED" />
-                <action android:name="android.intent.action.ACTION_USER_PRESENT" />
             </intent-filter>
         </receiver>
-        <service android:name=".EndlessService"/>
+
+        <service
+            android:name=".EndlessService"
+            android:stopWithTask="false" />
 
         <activity
             android:name=".MainActivity"
@@ -57,9 +63,10 @@
             android:name="flutterEmbedding"
             android:value="2" />
     </application>
-       <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
+
+    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE"></uses-permission>
     <uses-permission android:name="android.permission.INTERNET"></uses-permission>
     <uses-permission android:name="android.permission.WAKE_LOCK" />
-
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
 </manifest>
