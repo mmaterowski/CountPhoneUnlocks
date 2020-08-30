@@ -120,11 +120,11 @@ public class EndlessService extends Service {
         } else {
             builder = new Notification.Builder(this);
         }
-        builder.setContentTitle("Endless Service");
-        builder.setContentText("This is your favorite endless service working");
+        builder.setContentTitle("UnlockCounter");
+        builder.setContentText("I'm counting Your phone unlocks");
         builder.setContentIntent(pendingIntent);
-        builder.setSmallIcon(R.mipmap.ic_launcher);
-        builder.setTicker("Ticker text");
+        builder.setSmallIcon(R.mipmap.launcher_icon);
+        builder.setTicker("~~");
 
         return builder.build();
 
