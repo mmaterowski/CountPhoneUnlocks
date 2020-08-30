@@ -1,8 +1,21 @@
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:charts_flutter/flutter.dart' as charts;
 
 void main() {
   runApp(MyApp());
+}
+
+class PhoneUnlocks {
+  final String day;
+  final int clicks;
+  final charts.Color color;
+
+  PhoneUnlocks(this.day, this.clicks, Color color)
+      : this.color = charts.Color(
+            r: color.red, g: color.green, b: color.blue, a: color.alpha);
 }
 
 class MyApp extends StatelessWidget {
@@ -35,16 +48,6 @@ class MyApp extends StatelessWidget {
 
 class MyHomePage extends StatefulWidget {
   MyHomePage({Key key, this.title}) : super(key: key);
-
-  // This widget is the home page of your application. It is stateful, meaning
-  // that it has a State object (defined below) that contains fields that affect
-  // how it looks.
-
-  // This class is the configuration for the state. It holds the values (in this
-  // case the title) provided by the parent (in this case the App widget) and
-  // used by the build method of the State. Fields in a Widget subclass are
-  // always marked "final".
-
   final String title;
 
   @override
@@ -53,54 +56,69 @@ class MyHomePage extends StatefulWidget {
 
 class _MyHomePageState extends State<MyHomePage> {
   static const platform = const MethodChannel('UserActiveChannel');
-// Get battery level.
-  String _batteryLevel = 'Unknown battery level.';
+  int _recordCount = 0;
 
-  Future<void> _getBatteryLevel() async {
-    String batteryLevel;
+  Future<void> _getRecordsCount() async {
+    int count;
     try {
       var result = await platform.invokeMethod('getCount');
-      batteryLevel = result.toString();
+      count = result as int;
     } on PlatformException catch (e) {
-      batteryLevel = "Failed to get battery level: '${e.message}'.";
+      log(e.toString());
     }
 
     setState(() {
-      _batteryLevel = batteryLevel;
-    });
-  }
-
-  void _printError(error) {
-    print(error);
-  }
-
-  int _counter = 0;
-
-  void _incrementCounter() {
-    setState(() {
-      // This call to setState tells the Flutter framework that something has
-      // changed in this State, which causes it to rerun the build method below
-      // so that the display can reflect the updated values. If we changed
-      // _counter without calling setState(), then the build method would not be
-      // called again, and so nothing would appear to happen.
-      _counter++;
+      _recordCount = count;
     });
   }
 
   @override
   Widget build(BuildContext context) {
-    return Material(
-      child: Center(
+    var data = [
+      PhoneUnlocks('Last week', 26, Colors.blue),
+      PhoneUnlocks('Yesterday', 12, Colors.red),
+      PhoneUnlocks('Today', _recordCount, Colors.green),
+    ];
+
+    var series = [
+      charts.Series(
+        domainFn: (PhoneUnlocks clickData, _) => clickData.day,
+        measureFn: (PhoneUnlocks clickData, _) => clickData.clicks,
+        colorFn: (PhoneUnlocks clickData, _) => clickData.color,
+        id: 'Clicks',
+        data: data,
+      ),
+    ];
+
+    var chart = charts.BarChart(
+      series,
+      animate: true,
+    );
+
+    var chartWidget = Padding(
+      padding: EdgeInsets.all(32.0),
+      child: SizedBox(
+        height: 200.0,
+        child: chart,
+      ),
+    );
+
+    return Scaffold(
+      appBar: AppBar(title: Text(widget.title)),
+      body: Center(
         child: Column(
-          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-          children: [
-            RaisedButton(
-              child: Text('Get Battery Level'),
-              onPressed: _getBatteryLevel,
-            ),
-            Text(_batteryLevel),
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: <Widget>[
+            Text('You have unlocked the phone this many times today:'),
+            Text('$_recordCount', style: Theme.of(context).textTheme.display1),
+            chartWidget,
           ],
         ),
+      ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: _getRecordsCount,
+        tooltip: 'Get recent value',
+        child: Icon(Icons.add),
       ),
     );
   }
