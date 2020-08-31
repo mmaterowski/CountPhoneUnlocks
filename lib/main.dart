@@ -1,8 +1,11 @@
+import 'dart:convert';
 import 'dart:developer';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:charts_flutter/flutter.dart' as charts;
+
+import 'Player.dart';
 
 void main() {
   runApp(MyApp());
@@ -62,7 +65,10 @@ class _MyHomePageState extends State<MyHomePage> {
     int count;
     try {
       var result = await platform.invokeMethod('getCount');
-      count = result as int;
+      List<dynamic> playerMap = json.decode(result);
+      List<Player> players =
+          playerMap.map((player) => Player.fromJson(player)).toList();
+      count = 2;
     } on PlatformException catch (e) {
       log(e.toString());
     }

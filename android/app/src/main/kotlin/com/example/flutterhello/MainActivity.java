@@ -11,6 +11,8 @@ import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 
+import com.google.gson.Gson;
+
 import io.flutter.embedding.android.FlutterActivity;
 import io.flutter.embedding.engine.FlutterEngine;
 import io.flutter.embedding.engine.dart.DartExecutor;
@@ -83,7 +85,8 @@ public final class MainActivity extends FlutterActivity {
             public final void onMethodCall(@NotNull MethodCall call, @NotNull io.flutter.plugin.common.MethodChannel.Result result) {
                 SQLiteDatabaseHandler var10001 = MainActivity.this.db;
                 List records = var10001.allPlayers();
-                result.success(records.size());
+                String jsonString = new Gson().toJson(records);
+                result.success(jsonString);
             }
         }));
     }

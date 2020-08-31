@@ -5,7 +5,10 @@ import android.os.Build;
 
 import androidx.annotation.RequiresApi;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
+import java.util.Date;
 
 public class Player {
 
@@ -13,6 +16,7 @@ public class Player {
     private String name;
     private String position;
     private int height;
+    private long timestamp;
 
     public Player() {
     }
@@ -40,8 +44,22 @@ public class Player {
         this.name = name;
     }
 
+    public void setTimestamp(String timestamp) {
+        SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS");
+        try {
+            Date date = format.parse(timestamp);
+        this.timestamp = date.getTime();
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
+    }
+
     public String getPosition() {
         return position;
+    }
+
+    public long getTimestamp() {
+        return this.timestamp;
     }
 
     public void setPosition(String position) {
@@ -60,7 +78,6 @@ public class Player {
     public String toString() {
         return name + " - " + position + " - " + height + " cm";
     }
-
 
 
 }

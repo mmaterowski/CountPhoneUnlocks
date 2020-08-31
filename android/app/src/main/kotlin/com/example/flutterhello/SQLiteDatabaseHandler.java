@@ -1,5 +1,7 @@
 package com.example.flutterhello;
 
+import java.sql.Date;
+import java.time.Instant;
 import java.time.LocalDateTime;
 import java.util.LinkedList;
 import java.util.List;
@@ -23,8 +25,9 @@ public class SQLiteDatabaseHandler extends SQLiteOpenHelper {
     private static final String KEY_NAME = "name";
     private static final String KEY_POSITION = "position";
     private static final String KEY_HEIGHT = "height";
+    private static final String KEY_TIMESTAMP = "timestamp";
     private static final String[] COLUMNS = {KEY_ID, KEY_NAME, KEY_POSITION,
-            KEY_HEIGHT};
+            KEY_HEIGHT,KEY_TIMESTAMP};
 
     public SQLiteDatabaseHandler(Context context) {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
@@ -34,7 +37,7 @@ public class SQLiteDatabaseHandler extends SQLiteOpenHelper {
     public void onCreate(SQLiteDatabase db) {
         String CREATION_TABLE = "CREATE TABLE Players ( "
                 + "id INTEGER PRIMARY KEY AUTOINCREMENT, " + "name TEXT, "
-                + "position TEXT, " + "height INTEGER )";
+                + "position TEXT, " + "height INTEGER, " + "timestamp DATETIME DEFAULT CURRENT_TIMESTAMP)";
 
         db.execSQL(CREATION_TABLE);
     }
@@ -73,6 +76,8 @@ public class SQLiteDatabaseHandler extends SQLiteOpenHelper {
         player.setPosition(cursor.getString(2));
         player.setHeight(Integer.parseInt(cursor.getString(3)));
 
+
+
         return player;
     }
 
@@ -88,9 +93,7 @@ public class SQLiteDatabaseHandler extends SQLiteOpenHelper {
             do {
                 player = new Player();
                 player.setId(Integer.parseInt(cursor.getString(0)));
-                player.setName(cursor.getString(1));
-                player.setPosition(cursor.getString(2));
-                player.setHeight(Integer.parseInt(cursor.getString(3)));
+                player.setTimestamp(cursor.getString(1));
                 players.add(player);
             } while (cursor.moveToNext());
         }
