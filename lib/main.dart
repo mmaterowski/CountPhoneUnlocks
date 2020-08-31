@@ -6,6 +6,7 @@ import 'package:flutter/services.dart';
 import 'package:charts_flutter/flutter.dart' as charts;
 
 import 'Player.dart';
+import 'iterableExtension.dart';
 
 void main() {
   runApp(MyApp());
@@ -68,6 +69,8 @@ class _MyHomePageState extends State<MyHomePage> {
       List<dynamic> playerMap = json.decode(result);
       List<Player> players =
           playerMap.map((player) => Player.fromJson(player)).toList();
+
+      var dayMap = players.groupBy((p) => p.timestamp);
       count = 2;
     } on PlatformException catch (e) {
       log(e.toString());
