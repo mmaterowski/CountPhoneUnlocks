@@ -32,13 +32,7 @@ ThemeData _buildShrineTheme() {
     accentTextTheme: _buildShrineTextTheme(base.accentTextTheme),
     primaryIconTheme: base.iconTheme.copyWith(color: kShrineBrown900),
     inputDecorationTheme: InputDecorationTheme(
-      focusedBorder: CutCornersBorder(
-        borderSide: BorderSide(
-          width: 2.0,
-          color: kShrineBrown900,
-        ),
-      ),
-      border: CutCornersBorder(), // Replace code
+      border: OutlineInputBorder(),
     ),
   );
 }

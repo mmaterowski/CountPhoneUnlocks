@@ -86,12 +86,13 @@ class _MyHomePageState extends State<MyHomePage> {
                 'Drawer Header',
                 style: Theme.of(context).textTheme.headline5,
               ),
-              decoration: BoxDecoration(
-                color: Colors.blue,
-              ),
+              // decoration: BoxDecoration(
+              // color: Colors.blue,
+              // ),
             ),
             ListTile(
-              title: Text('Item 1'),
+              title:
+                  Text('Item 1', style: Theme.of(context).textTheme.headline6),
               onTap: () {
                 // Update the state of the app.
                 // ...
@@ -101,7 +102,7 @@ class _MyHomePageState extends State<MyHomePage> {
             ListTile(
               title: Text(
                 'Item 2',
-                style: Theme.of(context).textTheme.headline5,
+                style: Theme.of(context).textTheme.headline6,
               ),
               onTap: () {
                 // Update the state of the app.
