@@ -8,6 +8,7 @@ import 'package:charts_flutter/flutter.dart' as charts;
 import 'PhoneUnlocks.dart';
 import 'Player.dart';
 import 'iterableExtension.dart';
+import 'package:rHabbit/presentation/my_flutter_app_icons.dart' as AppIcon;
 
 class MyHomePage extends StatefulWidget {
   MyHomePage({Key key, this.title}) : super(key: key);
@@ -76,14 +77,13 @@ class _MyHomePageState extends State<MyHomePage> {
           title: RichText(
         text: TextSpan(
           children: [
-            TextSpan(
-              text: "Click ",
-            ),
             WidgetSpan(
-                child: Image(image: AssetImage('assets/images/app-icon.png'))),
+                child: Icon(
+              AppIcon.MyFlutterApp.app_icon,
+              size: 25,
+            )),
             TextSpan(
-              text: " to add",
-            ),
+                text: " rHabbit", style: Theme.of(context).textTheme.headline5),
           ],
         ),
       )),
