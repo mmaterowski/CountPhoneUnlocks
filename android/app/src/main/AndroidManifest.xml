@@ -6,7 +6,7 @@
     <application
         android:name="io.flutter.app.FlutterApplication"
         android:icon="@mipmap/launcher_icon"
-        android:label="Unlock Counter">
+        android:label="rHabbit">
 
 
         <receiver

@@ -72,7 +72,21 @@ class _MyHomePageState extends State<MyHomePage> {
     );
 
     return Scaffold(
-      appBar: AppBar(title: Text(widget.title)),
+      appBar: AppBar(
+          title: RichText(
+        text: TextSpan(
+          children: [
+            TextSpan(
+              text: "Click ",
+            ),
+            WidgetSpan(
+                child: Image(image: AssetImage('assets/images/app-icon.png'))),
+            TextSpan(
+              text: " to add",
+            ),
+          ],
+        ),
+      )),
       drawer: Drawer(
         // Add a ListView to the drawer. This ensures the user can scroll
         // through the options in the drawer if there isn't enough vertical

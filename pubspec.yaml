@@ -1,4 +1,4 @@
-name: UnlockCounter
+name: rHabbit
 description: This shit is lit.
 
 # The following line prevents the package from being accidentally published to
@@ -37,7 +37,7 @@ dev_dependencies:
 flutter_icons:
   android: "launcher_icon"
   ios: true
-  image_path: "assets/icon/app-icon.png"
+  image_path: "assets/icon/app-icon-pink.png"
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
 
@@ -53,7 +53,8 @@ flutter:
   # included with your application, so that you can use the icons in
   # the material Icons class.
   uses-material-design: true
-
+  assets:
+    - assets/images/
   # To add assets to your application, add an assets section, like this:
   # assets:
   #   - images/a_dot_burr.jpeg
