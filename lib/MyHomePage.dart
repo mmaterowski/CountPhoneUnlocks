@@ -31,7 +31,7 @@ class _MyHomePageState extends State<MyHomePage> {
           playerMap.map((player) => Player.fromJson(player)).toList();
 
       var dayMap = players.groupBy((p) => p.timestamp);
-      count = 2;
+      count = 35;
     } on PlatformException catch (e) {
       log(e.toString());
     }
