@@ -74,19 +74,37 @@ class _MyHomePageState extends State<MyHomePage> {
 
     return Scaffold(
       appBar: AppBar(
-          title: RichText(
-        text: TextSpan(
-          children: [
-            WidgetSpan(
-                child: Icon(
-              AppIcon.MyFlutterApp.app_icon,
-              size: 25,
-            )),
-            TextSpan(
-                text: " rHabbit", style: Theme.of(context).textTheme.headline5),
+          actions: [
+            Material(
+              elevation: 4.0,
+              shape: CircleBorder(),
+              clipBehavior: Clip.hardEdge,
+              color: Colors.transparent,
+              child: Ink.image(
+                image: AssetImage('assets/images/profile-picture.jpg'),
+                fit: BoxFit.contain,
+                width: 80.0,
+                height: 80.0,
+                child: InkWell(
+                  onTap: () {},
+                ),
+              ),
+            )
           ],
-        ),
-      )),
+          title: RichText(
+            text: TextSpan(
+              children: [
+                WidgetSpan(
+                    child: Icon(
+                  AppIcon.MyFlutterApp.app_icon,
+                  size: 25,
+                )),
+                TextSpan(
+                    text: " rHabbit",
+                    style: Theme.of(context).textTheme.headline5),
+              ],
+            ),
+          )),
       drawer: Drawer(
         // Add a ListView to the drawer. This ensures the user can scroll
         // through the options in the drawer if there isn't enough vertical
