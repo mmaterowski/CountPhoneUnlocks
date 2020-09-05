@@ -11,7 +11,6 @@ void main() {
   ));
 }
 
-// TODO: Build a Shrine Theme (103)
 final ThemeData _kShrineTheme = _buildShrineTheme();
 
 ThemeData _buildShrineTheme() {

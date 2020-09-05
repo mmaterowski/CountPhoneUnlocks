@@ -131,12 +131,20 @@ class _MyHomePageState extends State<MyHomePage> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
-            Text('You have unlocked the phone this many times today:'),
-            Text('$_recordCount', style: Theme.of(context).textTheme.headline4),
+            Text(
+              'You have unlocked the phone this many times today:',
+              style: Theme.of(context).textTheme.headline6,
+              textAlign: TextAlign.center,
+            ),
+            Padding(
+                padding: EdgeInsets.all(32.0),
+                child: Text('$_recordCount',
+                    style: Theme.of(context).textTheme.headline4)),
             chartWidget,
           ],
         ),
       ),
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       floatingActionButton: FloatingActionButton(
         onPressed: _getRecordsCount,
         tooltip: 'Get recent value',
