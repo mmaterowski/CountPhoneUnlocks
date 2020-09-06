@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:rHabbit/widgets/routes.dart';
 
 class RHabbitDrawer extends StatelessWidget {
   @override
@@ -13,23 +14,24 @@ class RHabbitDrawer extends StatelessWidget {
               style: Theme.of(context).textTheme.headline5,
             ),
           ),
-          ListTile(
-            title: Text('Item 1', style: Theme.of(context).textTheme.headline6),
-            onTap: () {
-              Navigator.pop(context);
-            },
-          ),
-          ListTile(
-            title: Text(
-              'Item 2',
-              style: Theme.of(context).textTheme.headline6,
-            ),
-            onTap: () {
-              Navigator.pop(context);
-            },
-          ),
+          _createDrawerItem(
+              text: "About",
+              icon: Icons.info,
+              onTap: () =>
+                  Navigator.pushReplacementNamed(context, Routes.about)),
+          _createDrawerItem(
+              text: "Home",
+              icon: Icons.calendar_today,
+              onTap: () =>
+                  Navigator.pushReplacementNamed(context, Routes.home)),
+          _createDrawerItem(text: "Item3", icon: Icons.add_to_home_screen)
         ],
       ),
     );
   }
+}
+
+Widget _createDrawerItem(
+    {IconData icon, String text, GestureTapCallback onTap}) {
+  return ListTile(leading: new Icon(icon), title: Text(text), onTap: onTap);
 }

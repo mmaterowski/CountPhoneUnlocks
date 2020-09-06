@@ -11,6 +11,7 @@ import 'package:rHabbit/widgets/unlocks-chart.dart';
 import 'models/player.dart';
 
 class MyHomePage extends StatefulWidget {
+  static const String routeName = "/home";
   MyHomePage({Key key}) : super(key: key);
   @override
   _MyHomePageState createState() => _MyHomePageState();

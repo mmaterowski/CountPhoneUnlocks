@@ -1,14 +1,19 @@
 import 'package:flutter/material.dart';
+import 'package:rHabbit/About.dart';
 import 'package:rHabbit/styles/theme.dart';
+import 'package:rHabbit/widgets/routes.dart';
 import 'package:splashscreen/splashscreen.dart';
 import 'MyHomePage.dart';
 
 void main() {
   runApp(new MaterialApp(
-    title: 'rHabbit',
-    theme: ShrineTheme.buildTheme(),
-    home: MyApp(),
-  ));
+      title: 'rHabbit',
+      theme: ShrineTheme.buildTheme(),
+      home: MyApp(),
+      routes: <String, WidgetBuilder>{
+        Routes.home: (BuildContext context) => new MyHomePage(),
+        Routes.about: (BuildContext context) => new About(),
+      }));
 }
 
 class MyApp extends StatelessWidget {
@@ -25,28 +30,14 @@ class MyApp extends StatelessWidget {
         photoSize: 100.0,
         gradientBackground: new LinearGradient(
             begin: Alignment.bottomLeft,
-            end:
-                Alignment.topLeft, // 10% of the width, so there are ten blinds.
+            end: Alignment.topLeft,
             colors: [
               Theme.of(context).primaryColor,
               Theme.of(context).colorScheme.onBackground
-            ], // whitish to gray
-            tileMode:
-                TileMode.repeated), // repeats the gradient over the canvas)
+            ],
+            tileMode: TileMode.repeated),
         loadingText: new Text("We're getting things ready for You",
             style: Theme.of(context).textTheme.subtitle2),
         loaderColor: Theme.of(context).accentColor);
   }
-
-// class MyApp extends StatelessWidget {
-//   @override
-//   Widget build(BuildContext context) {
-//     return MaterialApp(
-//       title: 'rHabbit',
-//       theme: _kShrineTheme,
-//       home: MyHomePage(title: 'Flutter Demo Home Page'),
-//     );
-//   }
-// }
-
 }
