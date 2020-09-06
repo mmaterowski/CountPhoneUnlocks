@@ -8,6 +8,7 @@ import 'package:rHabbit/widgets/bottom-navigation.dart';
 import 'package:rHabbit/widgets/count-section.dart';
 import 'package:rHabbit/widgets/drawer.dart';
 import 'package:rHabbit/widgets/profile-picture.dart';
+import 'package:rHabbit/widgets/stats-section.dart';
 import 'package:rHabbit/widgets/unlocks-chart.dart';
 import 'models/player.dart';
 
@@ -69,15 +70,11 @@ class _MyHomePageState extends State<MyHomePage> {
               recordCount: _recordCount,
             ),
             new UnlocksChart(unlockData: _unlockData),
+            new StatsSection(averageUnlockCount: _recordCount - 10)
           ],
         ),
       ),
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-      floatingActionButton: FloatingActionButton(
-        onPressed: _getRecordsCount,
-        tooltip: 'Get recent value',
-        child: Icon(Icons.add),
-      ),
     );
   }
 }

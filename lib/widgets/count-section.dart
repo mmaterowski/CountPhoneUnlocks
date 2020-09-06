@@ -8,7 +8,7 @@ class CountSection extends StatelessWidget {
   Widget build(BuildContext context) {
     return Column(children: [
       Text(
-        'You have unlocked the phone this many times today:',
+        'You have unlocked Your phone',
         style: Theme.of(context).textTheme.headline6,
         textAlign: TextAlign.center,
       ),
@@ -32,6 +32,11 @@ class CountSection extends StatelessWidget {
                 count: recordCount, duration: Duration(milliseconds: 500))
           ],
         ),
+      ),
+      Text(
+        'times today',
+        style: Theme.of(context).textTheme.headline6,
+        textAlign: TextAlign.center,
       ),
     ]);
   }
