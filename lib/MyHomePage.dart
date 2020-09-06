@@ -19,7 +19,7 @@ class MyHomePage extends StatefulWidget {
 class _MyHomePageState extends State<MyHomePage> {
   static const platform = const MethodChannel('UserActiveChannel');
   int _recordCount = 0;
-  List<Player> _unlockData;
+  List<Player> _unlockData = new List<Player>();
 
   Future<void> _getRecordsCount() async {
     int count;
@@ -31,7 +31,7 @@ class _MyHomePageState extends State<MyHomePage> {
       List<Player> players =
           playerMap.map((player) => Player.fromJson(player)).toList();
       unlockData = players;
-      count = 35;
+      count = players.length;
     } on PlatformException catch (e) {
       log(e.toString());
     }

@@ -11,7 +11,7 @@ class UnlocksChart {
     var data = [
       PhoneUnlocks('Last week', 26, Colors.blue),
       PhoneUnlocks('Yesterday', 12, Colors.red),
-      PhoneUnlocks('Today', groupedUnlocks.length, Colors.green),
+      PhoneUnlocks('Today', unlockData.length, Colors.green),
     ];
 
     var series = [
