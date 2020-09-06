@@ -5,8 +5,11 @@ import '../models/phone-unlocks.dart';
 import 'package:charts_flutter/flutter.dart' as charts;
 import '../extensions/iterableExtension.dart';
 
-class UnlocksChart {
-  static Padding buildChart(List<Player> unlockData) {
+class UnlocksChart extends StatelessWidget {
+  final List<Player> unlockData;
+  UnlocksChart({Key key, this.unlockData}) : super(key: key);
+  @override
+  Widget build(BuildContext context) {
     var groupedUnlocks = unlockData.groupBy((p) => p.timestamp);
     var data = [
       PhoneUnlocks('Last week', 26, Colors.blue),

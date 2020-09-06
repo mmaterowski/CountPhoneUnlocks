@@ -2,8 +2,9 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:rHabbit/styles/my_flutter_app_icons.dart' as AppIcon;
 
-class AppTitle {
-  static RichText build(BuildContext context) {
+class AppTitle extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
     return RichText(
       text: TextSpan(
         children: [

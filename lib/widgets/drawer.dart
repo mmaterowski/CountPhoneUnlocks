@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 
-class RHabbitDrawer {
-  static Drawer build(BuildContext context) {
+class RHabbitDrawer extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
     return Drawer(
       child: ListView(
         padding: EdgeInsets.zero,

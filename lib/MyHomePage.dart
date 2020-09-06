@@ -45,16 +45,19 @@ class _MyHomePageState extends State<MyHomePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-          actions: [ProfilePicture.build()], title: AppTitle.build(context)),
-      drawer: RHabbitDrawer.build(context),
+      appBar: AppBar(actions: [
+        new ProfilePicture(pictureUrl: 'assets/images/profile-picture.jpg')
+      ], title: new AppTitle()),
+      drawer: new RHabbitDrawer(),
       bottomNavigationBar: RhabbitBottomNavigation.build(),
       body: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
-            CountSection.build(context, _recordCount),
-            UnlocksChart.buildChart(_unlockData),
+            new CountSection(
+              recordCount: _recordCount,
+            ),
+            new UnlocksChart(unlockData: _unlockData),
           ],
         ),
       ),

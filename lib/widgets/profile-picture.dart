@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
 
-class ProfilePicture {
-  static final String pictureUrl = 'assets/images/profile-picture.jpg';
-
-  static Material build() {
+class ProfilePicture extends StatelessWidget {
+  String pictureUrl;
+  @override
+  ProfilePicture({Key key, this.pictureUrl}) : super(key: key);
+  Widget build(BuildContext context) {
     return Material(
       elevation: 4.0,
       shape: CircleBorder(),
