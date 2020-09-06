@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:rHabbit/widgets/animated-count.dart';
 
 class CountSection extends StatelessWidget {
   final int recordCount;
@@ -11,10 +12,26 @@ class CountSection extends StatelessWidget {
         style: Theme.of(context).textTheme.headline6,
         textAlign: TextAlign.center,
       ),
-      Padding(
-          padding: EdgeInsets.all(32.0),
-          child: Text('$recordCount',
-              style: Theme.of(context).textTheme.headline4)),
+      Container(
+        margin: EdgeInsets.all(10),
+        padding: EdgeInsets.all(10),
+        width: 80,
+        height: 80,
+        decoration: BoxDecoration(
+          border: Border.all(width: 2),
+          shape: BoxShape.circle,
+          // You can use like this way or like the below line
+          //borderRadius: new BorderRadius.circular(30.0),
+          color: Colors.transparent,
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: <Widget>[
+            AnimatedCount(count: recordCount, duration: Duration(seconds: 2))
+          ],
+        ),
+      ),
     ]);
   }
 }
