@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:developer';
 import 'package:flutter/material.dart';
+import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
 import 'package:rHabbit/widgets/app-title.dart';
 import 'package:rHabbit/widgets/bottom-navigation.dart';
@@ -18,6 +19,15 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
+  @override
+  void initState() {
+    super.initState();
+    if (SchedulerBinding.instance.schedulerPhase ==
+        SchedulerPhase.persistentCallbacks) {
+      SchedulerBinding.instance.addPostFrameCallback((_) => _getRecordsCount());
+    }
+  }
+
   static const platform = const MethodChannel('UserActiveChannel');
   int _recordCount = 0;
   List<Player> _unlockData = new List<Player>();

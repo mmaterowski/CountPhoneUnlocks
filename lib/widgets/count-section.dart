@@ -28,7 +28,8 @@ class CountSection extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.center,
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
-            AnimatedCount(count: recordCount, duration: Duration(seconds: 2))
+            AnimatedCount(
+                count: recordCount, duration: Duration(milliseconds: 500))
           ],
         ),
       ),

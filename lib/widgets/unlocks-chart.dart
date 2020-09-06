@@ -12,8 +12,8 @@ class UnlocksChart extends StatelessWidget {
   Widget build(BuildContext context) {
     var groupedUnlocks = unlockData.groupBy((p) => p.timestamp);
     var data = [
-      PhoneUnlocks('Last week', 26, Colors.blue),
-      PhoneUnlocks('Yesterday', 12, Colors.red),
+      PhoneUnlocks('Last week', unlockData.length + 10, Colors.blue),
+      PhoneUnlocks('Yesterday', unlockData.length + 50, Colors.red),
       PhoneUnlocks('Today', unlockData.length, Colors.green),
     ];
 
@@ -30,6 +30,7 @@ class UnlocksChart extends StatelessWidget {
     var chart = charts.BarChart(
       series,
       animate: true,
+      animationDuration: new Duration(milliseconds: 500),
     );
 
     var chartWidget = Padding(
