@@ -5,14 +5,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:charts_flutter/flutter.dart' as charts;
 
-import 'PhoneUnlocks.dart';
-import 'Player.dart';
-import 'iterableExtension.dart';
-import 'package:rHabbit/presentation/my_flutter_app_icons.dart' as AppIcon;
+import 'models/phone-unlocks.dart';
+import 'models/player.dart';
+import 'extensions/iterableExtension.dart';
+import 'package:rHabbit/styles/my_flutter_app_icons.dart' as AppIcon;
 
 class MyHomePage extends StatefulWidget {
-  MyHomePage({Key key, this.title}) : super(key: key);
-  final String title;
+  MyHomePage({Key key}) : super(key: key);
 
   @override
   _MyHomePageState createState() => _MyHomePageState();
@@ -145,6 +144,21 @@ class _MyHomePageState extends State<MyHomePage> {
           ],
         ),
       ),
+      bottomNavigationBar:
+          BottomNavigationBar(items: const <BottomNavigationBarItem>[
+        BottomNavigationBarItem(
+          icon: Icon(Icons.calendar_today),
+          title: Text('My day'),
+        ),
+        BottomNavigationBarItem(
+          icon: Icon(Icons.trending_up),
+          title: Text('Stats'),
+        ),
+        BottomNavigationBarItem(
+          icon: Icon(Icons.wb_incandescent),
+          title: Text('Tips'),
+        ),
+      ]),
       body: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,

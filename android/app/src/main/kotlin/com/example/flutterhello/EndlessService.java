@@ -40,7 +40,6 @@ public class EndlessService extends Service {
     @Override
     public void onDestroy() {
         super.onDestroy();
-        Toast.makeText(this, "My Service Stopped", Toast.LENGTH_LONG).show();
         unregisterReceiver((this.userPresentReceiver));
         instance = null;
     }
@@ -74,7 +73,6 @@ public class EndlessService extends Service {
 
     private void startService() {
         if (isServiceStarted) return;
-        Toast.makeText(this, "Service starting its task", Toast.LENGTH_SHORT).show();
         isServiceStarted = true;
 
         new Utils().setServiceState(this, ServiceState.STARTED);

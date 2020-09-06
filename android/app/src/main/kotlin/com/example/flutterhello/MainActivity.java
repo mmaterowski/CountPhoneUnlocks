@@ -70,8 +70,6 @@ public final class MainActivity extends FlutterActivity {
 
     public void configureFlutterEngine(@NonNull @NotNull FlutterEngine flutterEngine) {
         super.configureFlutterEngine(flutterEngine);
-        Toast.makeText(this, "rejestruje", Toast.LENGTH_LONG).show();
-
 //        AutoStartHelper.getInstance().getAutoStartPermission(this);
         actionOnService(Actions.START);
 
