@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'dart:developer';
+import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
@@ -33,7 +34,7 @@ class _MyHomePageState extends State<MyHomePage> {
   int _recordCount = 0;
   List<Player> _unlockData = new List<Player>();
   Future<void> _getRecordsCount() async {
-    int count;
+    int count = 0;
     List<Player> unlockData;
 
     try {
@@ -42,7 +43,7 @@ class _MyHomePageState extends State<MyHomePage> {
       List<Player> players =
           playerMap.map((player) => Player.fromJson(player)).toList();
       unlockData = players;
-      count = players.length;
+      count = getTodayCount(players);
     } on PlatformException catch (e) {
       log(e.toString());
     }
@@ -76,4 +77,15 @@ class _MyHomePageState extends State<MyHomePage> {
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
     );
   }
+}
+
+int getTodayCount(List<Player> players) {
+  var groupedRecords =
+      groupBy(players, (Player obj) => getStringFromDate(obj.timestamp));
+  var today =
+      "${DateTime.now().year.toString()}/${DateTime.now().month.toString()}/${DateTime.now().day.toString()}";
+  if (groupedRecords.containsKey(today)) {
+    return groupedRecords[today].length;
+  }
+  return 0;
 }
