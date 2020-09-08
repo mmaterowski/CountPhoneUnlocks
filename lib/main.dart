@@ -20,7 +20,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return new SplashScreen(
-        seconds: 3,
+        seconds: 1,
         navigateAfterSeconds: new MyHomePage(),
         title:
             new Text('rHabbit', style: Theme.of(context).textTheme.headline3),

@@ -32,7 +32,6 @@ class _MyHomePageState extends State<MyHomePage> {
   static const platform = const MethodChannel('UserActiveChannel');
   int _recordCount = 0;
   List<Player> _unlockData = new List<Player>();
-
   Future<void> _getRecordsCount() async {
     int count;
     List<Player> unlockData;

@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:rHabbit/widgets/animated-count.dart';
 
 class StatsSection extends StatelessWidget {
   final int averageUnlockCount;

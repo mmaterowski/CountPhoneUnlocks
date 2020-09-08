@@ -1,6 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:rHabbit/models/player.dart';
+import "package:collection/collection.dart";
 import '../models/phone-unlocks.dart';
 import 'package:charts_flutter/flutter.dart' as charts;
 import '../extensions/iterableExtension.dart';
@@ -10,12 +11,26 @@ class UnlocksChart extends StatelessWidget {
   UnlocksChart({Key key, this.unlockData}) : super(key: key);
   @override
   Widget build(BuildContext context) {
-    var groupedUnlocks = unlockData.groupBy((p) => p.timestamp);
-    var data = [
-      PhoneUnlocks('Last week', unlockData.length + 10, Colors.blue),
-      PhoneUnlocks('Yesterday', unlockData.length + 50, Colors.red),
-      PhoneUnlocks('Today', unlockData.length, Colors.green),
-    ];
+    List<PhoneUnlocks> data = new List<PhoneUnlocks>();
+    var groupedUnlocks =
+        unlockData.groupBy((p) => getStringFromDate(p.timestamp));
+    var groupedRecords =
+        groupBy(unlockData, (Player obj) => getStringFromDate(obj.timestamp));
+    var today =
+        "${DateTime.now().year.toString()}/${DateTime.now().month.toString()}/${DateTime.now().day.toString()}";
+    if (groupedUnlocks.containsKey(today)) {
+      var todayData = groupedUnlocks[today];
+      var groupedByHour =
+          groupBy(todayData, (Player obj) => obj.timestamp.hour);
+
+      for (var i = 0; i < 24; i++) {
+        int counts = 0;
+        if (groupedByHour.containsKey(i)) {
+          counts = groupedByHour[i].length;
+        }
+        data.add(new PhoneUnlocks(i.toString(), counts, Colors.red));
+      }
+    }
 
     var series = [
       charts.Series(
@@ -43,4 +58,12 @@ class UnlocksChart extends StatelessWidget {
 
     return chartWidget;
   }
+}
+
+getStringFromDate(DateTime dateTime) {
+  return dateTime.year.toString() +
+      "/" +
+      dateTime.month.toString() +
+      "/" +
+      dateTime.day.toString();
 }
