@@ -45,7 +45,6 @@ class _MyHomePageState extends State<MyHomePage> {
           playerMap.map((player) => Player.fromJson(player)).toList();
       unlockData = players;
       count = getTodayCount(players);
-      var b = getThisWeekCount(players);
     } on PlatformException catch (e) {
       log(e.toString());
     }
@@ -71,7 +70,10 @@ class _MyHomePageState extends State<MyHomePage> {
             new CountSection(
               recordCount: _recordCount,
             ),
-            new UnlocksChart(unlockData: _unlockData),
+            new UnlocksChart(
+              unlockData: _unlockData,
+              chartType: Type.today,
+            ),
             new StatsSection(averageUnlockCount: _recordCount - 10)
           ],
         ),
@@ -84,26 +86,15 @@ class _MyHomePageState extends State<MyHomePage> {
 int getTodayCount(List<Player> players) {
   var groupedRecords =
       groupBy(players, (Player obj) => getStringFromDate(obj.timestamp));
-  var today =
-      "${DateTime.now().year.toString()}/${DateTime.now().month.toString()}/${DateTime.now().day.toString()}";
+  final DateFormat formatter = DateFormat('yyyy-MM-dd');
+  var today = formatter.format(DateTime.now());
   if (groupedRecords.containsKey(today)) {
     return groupedRecords[today].length;
   }
   return 0;
 }
 
-int getThisWeekCount(List<Player> players) {
-  var groupedRecords =
-      groupBy(players, (Player obj) => weekNumber(obj.timestamp));
-  var thisWeek = weekNumber(DateTime.now());
-  debugger;
-  if (groupedRecords.containsKey(thisWeek)) {
-    return groupedRecords[thisWeek].length;
-  }
-  return 0;
-}
-
-int weekNumber(DateTime date) {
-  int dayOfYear = int.parse(DateFormat("D").format(date));
-  return ((dayOfYear - date.weekday + 10) / 7).floor();
+String getStringFromDate(DateTime dateTime) {
+  final DateFormat formatter = DateFormat('yyyy-MM-dd');
+  return formatter.format(dateTime);
 }
