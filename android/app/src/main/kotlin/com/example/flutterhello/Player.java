@@ -44,8 +44,10 @@ public class Player {
         this.name = name;
     }
 
-    public void setTimestamp(String timestamp) {
-        SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS");
+    public void setTimestamp(String timestamp)  {
+        timestamp = timestamp.replace('T',' ');
+
+        SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm");
         try {
             Date date = format.parse(timestamp);
         this.timestamp = date.getTime();

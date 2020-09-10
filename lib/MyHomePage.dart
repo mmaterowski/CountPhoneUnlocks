@@ -4,6 +4,7 @@ import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
+import 'package:intl/intl.dart';
 import 'package:rHabbit/widgets/app-title.dart';
 import 'package:rHabbit/widgets/bottom-navigation.dart';
 import 'package:rHabbit/widgets/count-section.dart';
@@ -44,6 +45,7 @@ class _MyHomePageState extends State<MyHomePage> {
           playerMap.map((player) => Player.fromJson(player)).toList();
       unlockData = players;
       count = getTodayCount(players);
+      var b = getThisWeekCount(players);
     } on PlatformException catch (e) {
       log(e.toString());
     }
@@ -88,4 +90,20 @@ int getTodayCount(List<Player> players) {
     return groupedRecords[today].length;
   }
   return 0;
+}
+
+int getThisWeekCount(List<Player> players) {
+  var groupedRecords =
+      groupBy(players, (Player obj) => weekNumber(obj.timestamp));
+  var thisWeek = weekNumber(DateTime.now());
+  debugger;
+  if (groupedRecords.containsKey(thisWeek)) {
+    return groupedRecords[thisWeek].length;
+  }
+  return 0;
+}
+
+int weekNumber(DateTime date) {
+  int dayOfYear = int.parse(DateFormat("D").format(date));
+  return ((dayOfYear - date.weekday + 10) / 7).floor();
 }

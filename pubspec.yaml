@@ -26,6 +26,7 @@ dependencies:
   charts_flutter: 0.9.0
   flutter_launcher_icons: 0.7.5
   collection: 1.14.13
+  intl: 0.16.1
 
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.
