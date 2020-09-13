@@ -67,56 +67,44 @@ class UnlocksChart extends StatelessWidget {
 }
 
 AxisSpec<dynamic> buildAxisSpec(ChartType type, List<PhoneUnlocks> data) {
-  if (type == ChartType.year) {
-    return charts.DateTimeAxisSpec(
-        renderSpec: new charts.SmallTickRendererSpec(
-            minimumPaddingBetweenLabelsPx: 0,
-            // Tick and Label styling here.
-            labelStyle: new charts.TextStyleSpec(
-                fontSize: 12, // size in Pts.
-                color: charts.MaterialPalette.black),
+  RenderSpec<DateTime> renderSpec = new charts.SmallTickRendererSpec(
+      minimumPaddingBetweenLabelsPx: 0,
+      labelStyle: new charts.TextStyleSpec(
+          fontSize: 12, color: charts.MaterialPalette.black),
+      lineStyle: new charts.LineStyleSpec(color: charts.MaterialPalette.black));
 
-            // Change the line colors to match text color.
-            lineStyle:
-                new charts.LineStyleSpec(color: charts.MaterialPalette.black)),
-        tickFormatterSpec: AutoDateTimeTickFormatterSpec(
-            month: TimeFormatterSpec(
-          format: 'MMM',
-          transitionFormat: 'MMM',
-        )));
+  AutoDateTimeTickFormatterSpec tickFormatterSpec;
+  DateTimeTickProviderSpec tickProviderSpec;
+
+  if (type == ChartType.year) {
+    tickFormatterSpec = AutoDateTimeTickFormatterSpec(
+        month: TimeFormatterSpec(
+      format: 'MMM',
+      transitionFormat: 'MMM',
+    ));
   }
 
-  if (type == ChartType.month) {
-    return charts.DateTimeAxisSpec(
-      tickFormatterSpec: AutoDateTimeTickFormatterSpec(
+  if (type == ChartType.month || type == ChartType.week) {
+    tickFormatterSpec = AutoDateTimeTickFormatterSpec(
         day: TimeFormatterSpec(
-          format: 'dd.MM',
-          transitionFormat: 'dd.MM',
-        ),
-      ),
-    );
+      format: 'dd.MM',
+      transitionFormat: 'dd.MM',
+    ));
   }
 
   if (type == ChartType.week) {
-    return charts.DateTimeAxisSpec(
-      tickFormatterSpec: charts.AutoDateTimeTickFormatterSpec(
-        day: charts.TimeFormatterSpec(
-          format: 'dd.MM',
-          transitionFormat: 'dd.MM',
-        ),
-      ),
-      tickProviderSpec: charts.DayTickProviderSpec(increments: [1]),
-    );
+    tickProviderSpec = charts.DayTickProviderSpec(increments: [1]);
   }
   if (type == ChartType.today) {
-    var dayStart = data.first.timestamp;
-    dayStart = new DateTime(dayStart.year, dayStart.month, dayStart.day, 0);
-    return charts.DateTimeAxisSpec(
-        tickFormatterSpec: charts.AutoDateTimeTickFormatterSpec(
-      hour: new charts.TimeFormatterSpec(
-          format: "HH:mm", transitionFormat: "HH:mm"),
-    ));
+    tickFormatterSpec = charts.AutoDateTimeTickFormatterSpec(
+        hour: new charts.TimeFormatterSpec(
+            format: "HH:mm", transitionFormat: "HH:mm"));
   }
+
+  return charts.DateTimeAxisSpec(
+      renderSpec: renderSpec,
+      tickFormatterSpec: tickFormatterSpec,
+      tickProviderSpec: tickProviderSpec);
 }
 
 List<charts.Series<PhoneUnlocks, DateTime>> createSeries(

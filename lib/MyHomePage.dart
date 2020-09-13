@@ -84,10 +84,10 @@ class _MyHomePageState extends State<MyHomePage> {
     ChartType type;
     var numberOfEnums = ChartType.values.length;
     var indexOfCurrentValue = _chartType.index;
-    if (indexOfCurrentValue == numberOfEnums - 1) {
+    if (indexOfCurrentValue == 0) {
       type = _chartType;
     } else {
-      type = ChartType.values[indexOfCurrentValue + 1];
+      type = ChartType.values[indexOfCurrentValue - 1];
     }
 
     setState(() {
@@ -116,7 +116,7 @@ class _MyHomePageState extends State<MyHomePage> {
               onSwipeLeft: onSwipeLeft,
               child: new UnlocksChart(
                 unlockData: _unlockData,
-                chartType: ChartType.year,
+                chartType: _chartType,
               ),
             ),
             new StatsSection(averageUnlockCount: _recordCount - 10)
