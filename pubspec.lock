@@ -205,6 +205,13 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "1.0.5"
+  swipedetector:
+    dependency: "direct main"
+    description:
+      name: swipedetector
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "1.2.0"
   term_glyph:
     dependency: transitive
     description:
@@ -249,3 +256,4 @@ packages:
     version: "2.2.1"
 sdks:
   dart: ">=2.9.0-14.0.dev <3.0.0"
+  flutter: ">=0.1.4 <2.0.0"

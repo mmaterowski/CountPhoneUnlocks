@@ -12,6 +12,7 @@ import 'package:rHabbit/widgets/drawer.dart';
 import 'package:rHabbit/widgets/profile-picture.dart';
 import 'package:rHabbit/widgets/stats-section.dart';
 import 'package:rHabbit/widgets/unlocks-chart.dart';
+import 'package:swipedetector/swipedetector.dart';
 
 import 'models/unlock-record.dart';
 
@@ -63,17 +64,34 @@ class _MyHomePageState extends State<MyHomePage> {
     }
   }
 
-  void onSwipe(DragUpdateDetails details) {
+  void onSwipeRight() {
     ChartType type;
-    if (details.delta.dx > 0) {
-      type = ChartType.week;
-    }
-
-    if (details.delta.dx < 0) {
-      type = ChartType.today;
+    var numberOfEnums = ChartType.values.length;
+    var indexOfCurrentValue = _chartType.index;
+    if (indexOfCurrentValue < numberOfEnums - 1) {
+      type = ChartType.values[indexOfCurrentValue + 1];
+    } else {
+      type = _chartType;
     }
 
     setState(() {
+      // _chartType = type;
+      _chartType = type;
+    });
+  }
+
+  void onSwipeLeft() {
+    ChartType type;
+    var numberOfEnums = ChartType.values.length;
+    var indexOfCurrentValue = _chartType.index;
+    if (indexOfCurrentValue == numberOfEnums - 1) {
+      type = _chartType;
+    } else {
+      type = ChartType.values[indexOfCurrentValue + 1];
+    }
+
+    setState(() {
+      // _chartType = type;
       _chartType = type;
     });
   }
@@ -93,11 +111,12 @@ class _MyHomePageState extends State<MyHomePage> {
             new CountSection(
               recordCount: _recordCount,
             ),
-            GestureDetector(
-              onPanUpdate: onSwipe,
+            SwipeDetector(
+              onSwipeRight: onSwipeRight,
+              onSwipeLeft: onSwipeLeft,
               child: new UnlocksChart(
                 unlockData: _unlockData,
-                chartType: _chartType,
+                chartType: ChartType.year,
               ),
             ),
             new StatsSection(averageUnlockCount: _recordCount - 10)
