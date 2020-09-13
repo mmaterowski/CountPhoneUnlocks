@@ -75,14 +75,12 @@ class _MyHomePageState extends State<MyHomePage> {
     }
 
     setState(() {
-      // _chartType = type;
       _chartType = type;
     });
   }
 
   void onSwipeLeft() {
     ChartType type;
-    var numberOfEnums = ChartType.values.length;
     var indexOfCurrentValue = _chartType.index;
     if (indexOfCurrentValue == 0) {
       type = _chartType;
@@ -91,7 +89,6 @@ class _MyHomePageState extends State<MyHomePage> {
     }
 
     setState(() {
-      // _chartType = type;
       _chartType = type;
     });
   }
