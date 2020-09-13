@@ -2,26 +2,26 @@ import 'package:charts_flutter/flutter.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import 'package:rHabbit/models/player.dart';
 import "package:collection/collection.dart";
+import 'package:rHabbit/models/unlock-record.dart';
 import '../models/phone-unlocks.dart';
 import 'package:charts_flutter/flutter.dart' as charts;
 
-enum Type { today, week, month, year }
+enum ChartType { today, week, month, year }
 
 class UnlocksChart extends StatelessWidget {
-  final List<Player> unlockData;
-  final Type chartType;
+  final List<UnlockRecord> unlockData;
+  final ChartType chartType;
 
   UnlocksChart({Key key, this.unlockData, this.chartType}) : super(key: key);
   @override
   Widget build(BuildContext context) {
     List<PhoneUnlocks> data = new List<PhoneUnlocks>();
     charts.TimeSeriesChart chart;
-    if (this.chartType == Type.today) {
+    if (this.chartType == ChartType.today) {
       data = buildTodaySeries(unlockData);
     }
-    if (this.chartType == Type.week) {
+    if (this.chartType == ChartType.week) {
       data = buildWeekSeries(unlockData);
     }
     var series = createSeries(data);
@@ -48,8 +48,8 @@ class UnlocksChart extends StatelessWidget {
   }
 }
 
-AxisSpec<dynamic> buildAxisSpec(Type type) {
-  if (type == Type.week) {
+AxisSpec<dynamic> buildAxisSpec(ChartType type) {
+  if (type == ChartType.week) {
     return charts.DateTimeAxisSpec(
       tickFormatterSpec: charts.AutoDateTimeTickFormatterSpec(
         day: charts.TimeFormatterSpec(
@@ -60,7 +60,7 @@ AxisSpec<dynamic> buildAxisSpec(Type type) {
       tickProviderSpec: charts.DayTickProviderSpec(increments: [1]),
     );
   }
-  if (type == Type.today) {
+  if (type == ChartType.today) {
     return charts.DateTimeAxisSpec(
       tickFormatterSpec: charts.AutoDateTimeTickFormatterSpec(
         hour:
@@ -88,7 +88,7 @@ String getStringFromDate(DateTime dateTime) {
   return formatter.format(dateTime);
 }
 
-List<PhoneUnlocks> buildWeekSeries(List<Player> unlockData) {
+List<PhoneUnlocks> buildWeekSeries(List<UnlockRecord> unlockData) {
   List<PhoneUnlocks> data = new List<PhoneUnlocks>();
   var todayRecords = getThisWeekRecords(unlockData);
   for (var i = 0; i < 7; i++) {
@@ -104,19 +104,19 @@ List<PhoneUnlocks> buildWeekSeries(List<Player> unlockData) {
   return data;
 }
 
-Map<String, List<Player>> getThisWeekRecords(List<Player> players) {
+Map<String, List<UnlockRecord>> getThisWeekRecords(List<UnlockRecord> record) {
   var groupedRecords =
-      groupBy(players, (Player obj) => weekNumber(obj.timestamp));
+      groupBy(record, (UnlockRecord obj) => weekNumber(obj.timestamp));
   var thisWeek = weekNumber(DateTime.now());
   if (groupedRecords.containsKey(thisWeek)) {
     var thisWeekRecords = groupedRecords[thisWeek];
-    return groupBy(
-        thisWeekRecords, (Player obj) => getStringFromDate(obj.timestamp));
+    return groupBy(thisWeekRecords,
+        (UnlockRecord obj) => getStringFromDate(obj.timestamp));
   }
-  return Map<String, List<Player>>();
+  return Map<String, List<UnlockRecord>>();
 }
 
-List<PhoneUnlocks> buildTodaySeries(List<Player> unlockData) {
+List<PhoneUnlocks> buildTodaySeries(List<UnlockRecord> unlockData) {
   List<PhoneUnlocks> data = new List<PhoneUnlocks>();
   var todayRecords = getTodayRecords(unlockData);
   for (var key in todayRecords.keys) {
@@ -127,15 +127,16 @@ List<PhoneUnlocks> buildTodaySeries(List<Player> unlockData) {
   return data;
 }
 
-Map<int, List<Player>> getTodayRecords(List<Player> players) {
+Map<int, List<UnlockRecord>> getTodayRecords(List<UnlockRecord> records) {
   var groupedRecords =
-      groupBy(players, (Player obj) => getStringFromDate(obj.timestamp));
+      groupBy(records, (UnlockRecord obj) => getStringFromDate(obj.timestamp));
   final DateFormat formatter = DateFormat('yyyy-MM-dd');
   var today = formatter.format(DateTime.now());
   if (groupedRecords.containsKey(today)) {
-    return groupBy(groupedRecords[today], (Player obj) => obj.timestamp.hour);
+    return groupBy(
+        groupedRecords[today], (UnlockRecord obj) => obj.timestamp.hour);
   }
-  return Map<int, List<Player>>();
+  return Map<int, List<UnlockRecord>>();
 }
 
 int weekNumber(DateTime date) {

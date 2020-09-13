@@ -12,39 +12,40 @@ import 'package:rHabbit/widgets/drawer.dart';
 import 'package:rHabbit/widgets/profile-picture.dart';
 import 'package:rHabbit/widgets/stats-section.dart';
 import 'package:rHabbit/widgets/unlocks-chart.dart';
-import 'models/player.dart';
+
+import 'models/unlock-record.dart';
 
 class MyHomePage extends StatefulWidget {
   static const String routeName = "/home";
+
   MyHomePage({Key key}) : super(key: key);
   @override
   _MyHomePageState createState() => _MyHomePageState();
 }
 
 class _MyHomePageState extends State<MyHomePage> {
+  static const platform = const MethodChannel('UserActiveChannel');
+  int _recordCount = 0;
+  List<UnlockRecord> _unlockData = new List<UnlockRecord>();
+  ChartType _chartType = ChartType.today;
+
   @override
   void initState() {
     super.initState();
-    if (SchedulerBinding.instance.schedulerPhase ==
-        SchedulerPhase.persistentCallbacks) {
-      SchedulerBinding.instance.addPostFrameCallback((_) => _getRecordsCount());
-    }
+    callbackAfterInit(_getRecordsCount);
   }
 
-  static const platform = const MethodChannel('UserActiveChannel');
-  int _recordCount = 0;
-  List<Player> _unlockData = new List<Player>();
   Future<void> _getRecordsCount() async {
     int count = 0;
-    List<Player> unlockData;
+    List<UnlockRecord> unlockData;
 
     try {
       var result = await platform.invokeMethod('getCount');
-      List<dynamic> playerMap = json.decode(result);
-      List<Player> players =
-          playerMap.map((player) => Player.fromJson(player)).toList();
-      unlockData = players;
-      count = getTodayCount(players);
+      List<dynamic> recordsMap = json.decode(result);
+      List<UnlockRecord> unlockRecords =
+          recordsMap.map((record) => UnlockRecord.fromJson(record)).toList();
+      unlockData = unlockRecords;
+      count = getTodayCount(unlockRecords);
     } on PlatformException catch (e) {
       log(e.toString());
     }
@@ -52,6 +53,28 @@ class _MyHomePageState extends State<MyHomePage> {
     setState(() {
       _recordCount = count;
       _unlockData = unlockData;
+    });
+  }
+
+  callbackAfterInit(Function method) {
+    if (SchedulerBinding.instance.schedulerPhase ==
+        SchedulerPhase.persistentCallbacks) {
+      SchedulerBinding.instance.addPostFrameCallback((_) => _getRecordsCount());
+    }
+  }
+
+  void onSwipe(DragUpdateDetails details) {
+    ChartType type;
+    if (details.delta.dx > 0) {
+      type = ChartType.week;
+    }
+
+    if (details.delta.dx < 0) {
+      type = ChartType.today;
+    }
+
+    setState(() {
+      _chartType = type;
     });
   }
 
@@ -70,9 +93,12 @@ class _MyHomePageState extends State<MyHomePage> {
             new CountSection(
               recordCount: _recordCount,
             ),
-            new UnlocksChart(
-              unlockData: _unlockData,
-              chartType: Type.today,
+            GestureDetector(
+              onPanUpdate: onSwipe,
+              child: new UnlocksChart(
+                unlockData: _unlockData,
+                chartType: _chartType,
+              ),
             ),
             new StatsSection(averageUnlockCount: _recordCount - 10)
           ],
@@ -83,9 +109,11 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 }
 
-int getTodayCount(List<Player> players) {
+void fetchDataFromBackend() {}
+
+int getTodayCount(List<UnlockRecord> records) {
   var groupedRecords =
-      groupBy(players, (Player obj) => getStringFromDate(obj.timestamp));
+      groupBy(records, (UnlockRecord obj) => getStringFromDate(obj.timestamp));
   final DateFormat formatter = DateFormat('yyyy-MM-dd');
   var today = formatter.format(DateTime.now());
   if (groupedRecords.containsKey(today)) {
