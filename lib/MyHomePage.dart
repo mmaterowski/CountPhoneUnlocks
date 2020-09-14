@@ -95,33 +95,93 @@ class _MyHomePageState extends State<MyHomePage> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(actions: [
-        new ProfilePicture(pictureUrl: 'assets/images/profile-picture.jpg')
-      ], title: new AppTitle()),
-      drawer: new RHabbitDrawer(),
-      bottomNavigationBar: RhabbitBottomNavigation.build(),
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            new CountSection(
-              recordCount: _recordCount,
-            ),
-            SwipeDetector(
-              onSwipeRight: onSwipeRight,
-              onSwipeLeft: onSwipeLeft,
-              child: new UnlocksChart(
-                unlockData: _unlockData,
-                chartType: _chartType,
+    return DefaultTabController(
+        length: 4,
+        child: Scaffold(
+          appBar: AppBar(
+              actions: [
+                new ProfilePicture(
+                    pictureUrl: 'assets/images/profile-picture.jpg')
+              ],
+              bottom: TabBar(
+                tabs: [
+                  Tab(text: "TODAY"),
+                  Tab(text: "WEEK"),
+                  Tab(text: "MONTH"),
+                  Tab(text: "YEAR"),
+                ],
               ),
-            ),
-            new StatsSection(averageUnlockCount: _recordCount - 10)
-          ],
-        ),
-      ),
-      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-    );
+              title: new AppTitle()),
+          drawer: new RHabbitDrawer(),
+          bottomNavigationBar: RhabbitBottomNavigation.build(),
+          body: SwipeDetector(
+            onSwipeRight: onSwipeRight,
+            onSwipeLeft: onSwipeLeft,
+            child: TabBarView(children: [
+              Center(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: <Widget>[
+                    new CountSection(
+                      recordCount: _recordCount,
+                    ),
+                    new UnlocksChart(
+                      unlockData: _unlockData,
+                      chartType: ChartType.today,
+                    ),
+                    new StatsSection(averageUnlockCount: _recordCount - 10)
+                  ],
+                ),
+              ),
+              Center(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: <Widget>[
+                    new CountSection(
+                      recordCount: _recordCount,
+                    ),
+                    new UnlocksChart(
+                      unlockData: _unlockData,
+                      chartType: ChartType.week,
+                    ),
+                    new StatsSection(averageUnlockCount: _recordCount - 10)
+                  ],
+                ),
+              ),
+              Center(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: <Widget>[
+                    new CountSection(
+                      recordCount: _recordCount,
+                    ),
+                    new UnlocksChart(
+                      unlockData: _unlockData,
+                      chartType: ChartType.month,
+                    ),
+                    new StatsSection(averageUnlockCount: _recordCount - 10)
+                  ],
+                ),
+              ),
+              Center(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: <Widget>[
+                    new CountSection(
+                      recordCount: _recordCount,
+                    ),
+                    new UnlocksChart(
+                      unlockData: _unlockData,
+                      chartType: ChartType.year,
+                    ),
+                    new StatsSection(averageUnlockCount: _recordCount - 10)
+                  ],
+                ),
+              ),
+            ]),
+          ),
+          backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+        ));
   }
 }
 
