@@ -14,6 +14,7 @@ import 'package:rHabbit/widgets/stats-section.dart';
 import 'package:rHabbit/widgets/unlocks-chart.dart';
 import 'package:swipedetector/swipedetector.dart';
 
+import 'models/chart-type.dart';
 import 'models/unlock-record.dart';
 
 class MyHomePage extends StatefulWidget {
@@ -123,7 +124,8 @@ class _MyHomePageState extends State<MyHomePage> {
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: <Widget>[
                     new CountSection(
-                      recordCount: _recordCount,
+                      unlockData: _unlockData,
+                      chartType: ChartType.today,
                     ),
                     new UnlocksChart(
                       unlockData: _unlockData,
@@ -138,7 +140,8 @@ class _MyHomePageState extends State<MyHomePage> {
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: <Widget>[
                     new CountSection(
-                      recordCount: _recordCount,
+                      unlockData: _unlockData,
+                      chartType: ChartType.week,
                     ),
                     new UnlocksChart(
                       unlockData: _unlockData,
@@ -153,7 +156,8 @@ class _MyHomePageState extends State<MyHomePage> {
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: <Widget>[
                     new CountSection(
-                      recordCount: _recordCount,
+                      unlockData: _unlockData,
+                      chartType: ChartType.month,
                     ),
                     new UnlocksChart(
                       unlockData: _unlockData,
@@ -168,7 +172,8 @@ class _MyHomePageState extends State<MyHomePage> {
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: <Widget>[
                     new CountSection(
-                      recordCount: _recordCount,
+                      unlockData: _unlockData,
+                      chartType: ChartType.year,
                     ),
                     new UnlocksChart(
                       unlockData: _unlockData,

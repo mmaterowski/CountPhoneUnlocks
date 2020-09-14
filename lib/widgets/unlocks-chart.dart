@@ -3,11 +3,11 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import "package:collection/collection.dart";
+import 'package:rHabbit/models/chart-type.dart';
 import 'package:rHabbit/models/unlock-record.dart';
+import 'package:rHabbit/utils/date-time-utils.dart';
 import '../models/phone-unlocks.dart';
 import 'package:charts_flutter/flutter.dart' as charts;
-
-enum ChartType { today, week, month, year }
 
 class UnlocksChart extends StatelessWidget {
   final List<UnlockRecord> unlockData;
@@ -120,11 +120,6 @@ List<charts.Series<PhoneUnlocks, DateTime>> createSeries(
   ];
 }
 
-String getStringFromDate(DateTime dateTime) {
-  final DateFormat formatter = DateFormat('yyyy-MM-dd');
-  return formatter.format(dateTime);
-}
-
 List<PhoneUnlocks> buildYearSeries(List<UnlockRecord> unlockData) {
   List<PhoneUnlocks> data = new List<PhoneUnlocks>();
   var thisYearRecords = getThisYearRecords(unlockData);
@@ -155,9 +150,9 @@ void addEmtyRecordsIfNeeded(List<PhoneUnlocks> data) {
   }
 }
 
-Map<int, List<UnlockRecord>> getThisYearRecords(List<UnlockRecord> record) {
+Map<int, List<UnlockRecord>> getThisYearRecords(List<UnlockRecord> records) {
   var groupedRecords =
-      groupBy(record, (UnlockRecord obj) => (obj.timestamp.year));
+      groupBy(records, (UnlockRecord obj) => (obj.timestamp.year));
   var thisYear = DateTime.now().year;
   if (groupedRecords.containsKey(thisYear)) {
     var thisYearRecords = groupedRecords[thisYear];
@@ -207,16 +202,10 @@ List<PhoneUnlocks> buildMonthSeries(List<UnlockRecord> unlockData) {
   return data;
 }
 
-DateTime lastDayOfMonth(DateTime month) {
-  var beginningNextMonth = (month.month < 12)
-      ? new DateTime(month.year, month.month + 1, 1)
-      : new DateTime(month.year + 1, 1, 1);
-  return beginningNextMonth.subtract(new Duration(days: 1));
-}
-
-Map<String, List<UnlockRecord>> getThisMonthRecords(List<UnlockRecord> record) {
+Map<String, List<UnlockRecord>> getThisMonthRecords(
+    List<UnlockRecord> records) {
   var groupedRecords =
-      groupBy(record, (UnlockRecord obj) => (obj.timestamp.month));
+      groupBy(records, (UnlockRecord obj) => (obj.timestamp.month));
   var thisMonth = DateTime.now().month;
   if (groupedRecords.containsKey(thisMonth)) {
     var thisMonthRecords = groupedRecords[thisMonth];
@@ -242,9 +231,9 @@ List<PhoneUnlocks> buildWeekSeries(List<UnlockRecord> unlockData) {
   return data;
 }
 
-Map<String, List<UnlockRecord>> getThisWeekRecords(List<UnlockRecord> record) {
+Map<String, List<UnlockRecord>> getThisWeekRecords(List<UnlockRecord> records) {
   var groupedRecords =
-      groupBy(record, (UnlockRecord obj) => weekNumber(obj.timestamp));
+      groupBy(records, (UnlockRecord obj) => weekNumber(obj.timestamp));
   var thisWeek = weekNumber(DateTime.now());
   if (groupedRecords.containsKey(thisWeek)) {
     var thisWeekRecords = groupedRecords[thisWeek];
@@ -275,9 +264,4 @@ Map<int, List<UnlockRecord>> getTodayRecords(List<UnlockRecord> records) {
         groupedRecords[today], (UnlockRecord obj) => obj.timestamp.hour);
   }
   return Map<int, List<UnlockRecord>>();
-}
-
-int weekNumber(DateTime date) {
-  int dayOfYear = int.parse(DateFormat("D").format(date));
-  return ((dayOfYear - date.weekday + 10) / 7).floor();
 }
