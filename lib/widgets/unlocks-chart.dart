@@ -9,6 +9,8 @@ import 'package:rHabbit/utils/date-time-utils.dart';
 import '../models/phone-unlocks.dart';
 import 'package:charts_flutter/flutter.dart' as charts;
 
+import 'custom-circle-symbol-renderer.dart';
+
 class UnlocksChart extends StatelessWidget {
   final List<UnlockRecord> unlockData;
   final ChartType chartType;
@@ -49,9 +51,23 @@ class UnlocksChart extends StatelessWidget {
         animate: true,
         animationDuration: new Duration(milliseconds: 500),
         defaultInteractions: false,
+        selectionModels: [
+          charts.SelectionModelConfig(
+              changedListener: (charts.SelectionModel model) {
+            if (model.hasDatumSelection) {
+              ToolTipMgr.setTitle({
+                'title': '${model.selectedDatum[0].datum.clicks}',
+                'subTitle': '111133'
+              });
+            }
+          })
+        ],
         behaviors: [
-          new charts.SelectNearest(),
-          new charts.DomainHighlighter()
+          new charts.DomainHighlighter(),
+          new charts.LinePointHighlighter(
+              symbolRenderer: CustomCircleSymbolRenderer()),
+          new charts.SelectNearest(
+              eventTrigger: charts.SelectionTrigger.tapAndDrag)
         ]);
 
     var chartWidget = Padding(
