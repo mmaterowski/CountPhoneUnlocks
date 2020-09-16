@@ -36,10 +36,10 @@ class _CountSectionState extends State<CountSection> {
         textAlign: TextAlign.center,
       ),
       Container(
-        margin: EdgeInsets.all(10),
-        padding: EdgeInsets.all(10),
-        width: 80,
-        height: 80,
+        margin: EdgeInsets.all(8),
+        padding: EdgeInsets.all(8),
+        width: 85,
+        height: 85,
         decoration: BoxDecoration(
           border: Border.all(width: 2),
           shape: BoxShape.circle,
