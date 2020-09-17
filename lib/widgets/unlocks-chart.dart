@@ -14,8 +14,10 @@ import 'custom-circle-symbol-renderer.dart';
 class UnlocksChart extends StatelessWidget {
   final List<UnlockRecord> unlockData;
   final ChartType chartType;
+  final int weekNumber;
 
-  UnlocksChart({Key key, this.unlockData, this.chartType}) : super(key: key);
+  UnlocksChart({Key key, this.unlockData, this.chartType, this.weekNumber})
+      : super(key: key);
   @override
   Widget build(BuildContext context) {
     List<PhoneUnlocks> data = new List<PhoneUnlocks>();
@@ -24,7 +26,7 @@ class UnlocksChart extends StatelessWidget {
       data = buildTodaySeries(unlockData);
     }
     if (this.chartType == ChartType.week) {
-      data = buildWeekSeries(unlockData);
+      data = buildWeekSeries(unlockData, this.weekNumber);
     }
     if (this.chartType == ChartType.month) {
       data = buildMonthSeries(unlockData);
@@ -39,13 +41,8 @@ class UnlocksChart extends StatelessWidget {
         domainAxis: buildAxisSpec(chartType, data),
         primaryMeasureAxis: new charts.NumericAxisSpec(
             renderSpec: new charts.GridlineRendererSpec(
-
-                // Tick and Label styling here.
                 labelStyle: new charts.TextStyleSpec(
-                    fontSize: 13, // size in Pts.
-                    color: charts.MaterialPalette.black),
-
-                // Change the line colors to match text color.
+                    fontSize: 13, color: charts.MaterialPalette.black),
                 lineStyle: new charts.LineStyleSpec(
                     color: charts.MaterialPalette.black))),
         animate: true,
@@ -172,30 +169,6 @@ Map<int, List<UnlockRecord>> getThisYearRecords(List<UnlockRecord> records) {
   var thisYear = DateTime.now().year;
   if (groupedRecords.containsKey(thisYear)) {
     var thisYearRecords = groupedRecords[thisYear];
-    // thisYearRecords.add(new UnlockRecord(4121244, new DateTime(2020, 1, 13)));
-    // thisYearRecords.add(new UnlockRecord(412164, new DateTime(2020, 2, 13)));
-    // thisYearRecords.add(new UnlockRecord(44221244, new DateTime(2020, 3, 13)));
-    // thisYearRecords.add(new UnlockRecord(44221241, new DateTime(2020, 4, 13)));
-    // thisYearRecords.add(new UnlockRecord(44224444, new DateTime(2020, 5, 13)));
-    // thisYearRecords.add(new UnlockRecord(44224444, new DateTime(2020, 6, 13)));
-    // thisYearRecords.add(new UnlockRecord(424112444, new DateTime(2020, 7, 15)));
-    // thisYearRecords.add(new UnlockRecord(44423444, new DateTime(2020, 8, 1)));
-    // thisYearRecords.add(new UnlockRecord(44423444, new DateTime(2020, 8, 1)));
-    // thisYearRecords.add(new UnlockRecord(4423444, new DateTime(2020, 8, 1)));
-    // thisYearRecords.add(new UnlockRecord(44123444, new DateTime(2020, 8, 1)));
-    // thisYearRecords.add(new UnlockRecord(44223444, new DateTime(2020, 8, 1)));
-    // thisYearRecords.add(new UnlockRecord(45423444, new DateTime(2020, 8, 1)));
-    // thisYearRecords.add(new UnlockRecord(4444444, new DateTime(2020, 8, 1)));
-    // thisYearRecords.add(new UnlockRecord(4443444, new DateTime(2020, 8, 1)));
-    // thisYearRecords.add(new UnlockRecord(4523444, new DateTime(2020, 8, 1)));
-    // thisYearRecords.add(new UnlockRecord(4444444, new DateTime(2020, 8, 1)));
-    // thisYearRecords.add(new UnlockRecord(442344, new DateTime(2020, 8, 12)));
-    // thisYearRecords.add(new UnlockRecord(5551255, new DateTime(2020, 8, 15)));
-    // thisYearRecords.add(new UnlockRecord(55512555, new DateTime(2020, 8, 17)));
-    // thisYearRecords.add(new UnlockRecord(55761255, new DateTime(2020, 9, 17)));
-    // thisYearRecords.add(new UnlockRecord(5765511, new DateTime(2020, 10, 17)));
-    // thisYearRecords.add(new UnlockRecord(9999, new DateTime(2020, 11, 17)));
-    // thisYearRecords.add(new UnlockRecord(939, new DateTime(2020, 12, 17)));
     return groupBy(thisYearRecords, (UnlockRecord obj) => obj.timestamp.month);
   }
   return Map<int, List<UnlockRecord>>();
@@ -231,9 +204,10 @@ Map<String, List<UnlockRecord>> getThisMonthRecords(
   return Map<String, List<UnlockRecord>>();
 }
 
-List<PhoneUnlocks> buildWeekSeries(List<UnlockRecord> unlockData) {
+List<PhoneUnlocks> buildWeekSeries(List<UnlockRecord> unlockData,
+    [int weekNumber]) {
   List<PhoneUnlocks> data = new List<PhoneUnlocks>();
-  var todayRecords = getThisWeekRecords(unlockData);
+  var todayRecords = getWeekRecords(unlockData, weekNumber);
   for (var i = 0; i < 7; i++) {
     int counts = 0;
     if (todayRecords.length - i <= 0) {
@@ -247,12 +221,12 @@ List<PhoneUnlocks> buildWeekSeries(List<UnlockRecord> unlockData) {
   return data;
 }
 
-Map<String, List<UnlockRecord>> getThisWeekRecords(List<UnlockRecord> records) {
+Map<String, List<UnlockRecord>> getWeekRecords(List<UnlockRecord> records,
+    [int numberOfWeek]) {
   var groupedRecords =
       groupBy(records, (UnlockRecord obj) => weekNumber(obj.timestamp));
-  var thisWeek = weekNumber(DateTime.now());
-  if (groupedRecords.containsKey(thisWeek)) {
-    var thisWeekRecords = groupedRecords[thisWeek];
+  if (groupedRecords.containsKey(numberOfWeek)) {
+    var thisWeekRecords = groupedRecords[numberOfWeek];
     return groupBy(thisWeekRecords,
         (UnlockRecord obj) => getStringFromDate(obj.timestamp));
   }

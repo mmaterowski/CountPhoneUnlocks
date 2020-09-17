@@ -91,7 +91,7 @@ int _getCount(ChartType chartType, List<UnlockRecord> unlockData) {
     case ChartType.today:
       return getTodayCount(unlockData);
     case ChartType.week:
-      return getThisWeekCount(unlockData);
+      return getWeekCount(unlockData);
     case ChartType.month:
       return getThisMonthCount(unlockData);
     case ChartType.year:
@@ -112,12 +112,11 @@ int getTodayCount(List<UnlockRecord> records) {
   return 0;
 }
 
-int getThisWeekCount(List<UnlockRecord> records) {
+int getWeekCount(List<UnlockRecord> records, [int numberOfWeek]) {
   var groupedRecords =
       groupBy(records, (UnlockRecord obj) => weekNumber(obj.timestamp));
-  var thisWeek = weekNumber(DateTime.now());
-  if (groupedRecords.containsKey(thisWeek)) {
-    return groupedRecords[thisWeek].length;
+  if (groupedRecords.containsKey(numberOfWeek)) {
+    return groupedRecords[numberOfWeek].length;
   }
   return 0;
 }

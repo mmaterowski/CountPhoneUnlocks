@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
+import 'package:rHabbit/utils/date-time-utils.dart';
 import 'package:rHabbit/widgets/app-title.dart';
 import 'package:rHabbit/widgets/bottom-navigation.dart';
 import 'package:rHabbit/widgets/count-section.dart';
@@ -30,6 +31,7 @@ class _MyHomePageState extends State<MyHomePage> {
   int _recordCount = 0;
   List<UnlockRecord> _unlockData = new List<UnlockRecord>();
   ChartType _chartType = ChartType.today;
+  int _weekNumber = weekNumber(DateTime.now());
 
   @override
   void initState() {
@@ -94,6 +96,13 @@ class _MyHomePageState extends State<MyHomePage> {
     });
   }
 
+  void setWeekNumber(bool increse) {
+    int newWeekNumber = increse ? _weekNumber + 1 : _weekNumber - 1;
+    setState(() {
+      _weekNumber = newWeekNumber;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return DefaultTabController(
@@ -146,8 +155,60 @@ class _MyHomePageState extends State<MyHomePage> {
                     new UnlocksChart(
                       unlockData: _unlockData,
                       chartType: ChartType.week,
+                      weekNumber: _weekNumber,
                     ),
-                    new StatsSection(averageUnlockCount: _recordCount - 10)
+                    Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceAround,
+                        children: [
+                          ButtonTheme(
+                            textTheme: Theme.of(context).buttonTheme.textTheme,
+                            colorScheme: Theme.of(context).colorScheme,
+                            buttonColor: Theme.of(context).textSelectionColor,
+                            minWidth: 130.0,
+                            height: 40.0,
+                            child: RaisedButton(
+                              child: Row(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  crossAxisAlignment: CrossAxisAlignment.center,
+                                  children: <Widget>[
+                                    Icon(Icons.arrow_back_ios),
+                                    Text("Previous")
+                                  ]),
+                              elevation: 2.0,
+                              autofocus: false,
+                              clipBehavior: Clip.hardEdge,
+                              shape: RoundedRectangleBorder(
+                                  borderRadius:
+                                      new BorderRadius.circular(26 / 1.5)),
+                              onPressed: () => setWeekNumber(false),
+                            ),
+                          ),
+                          ButtonTheme(
+                              textTheme:
+                                  Theme.of(context).buttonTheme.textTheme,
+                              colorScheme: Theme.of(context).colorScheme,
+                              buttonColor: Theme.of(context).textSelectionColor,
+                              minWidth: 130.0,
+                              height: 40.0,
+                              child: RaisedButton(
+                                child: Row(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.center,
+                                    children: <Widget>[
+                                      Text("Next"),
+                                      Icon(Icons.arrow_forward_ios),
+                                    ]),
+                                elevation: 2.0,
+                                autofocus: false,
+                                clipBehavior: Clip.hardEdge,
+                                shape: RoundedRectangleBorder(
+                                    borderRadius:
+                                        new BorderRadius.circular(26 / 1.5)),
+                                onPressed: () => setWeekNumber(true),
+                              )),
+                        ]),
+                    // new StatsSection(averageUnlockCount: _recordCount - 10)
                   ],
                 ),
               ),
