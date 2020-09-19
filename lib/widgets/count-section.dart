@@ -114,7 +114,7 @@ int getTodayCount(List<UnlockRecord> records) {
 
 int getWeekCount(List<UnlockRecord> records, [int numberOfWeek]) {
   var groupedRecords =
-      groupBy(records, (UnlockRecord obj) => weekNumber(obj.timestamp));
+      groupBy(records, (UnlockRecord obj) => getWeekNumber(obj.timestamp));
   if (groupedRecords.containsKey(numberOfWeek)) {
     return groupedRecords[numberOfWeek].length;
   }

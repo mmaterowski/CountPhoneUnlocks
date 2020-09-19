@@ -31,7 +31,8 @@ class _MyHomePageState extends State<MyHomePage> {
   int _recordCount = 0;
   List<UnlockRecord> _unlockData = new List<UnlockRecord>();
   ChartType _chartType = ChartType.today;
-  int _weekNumber = weekNumber(DateTime.now());
+  int _weekNumber = getWeekNumber(DateTime.now());
+  bool _isThereDataMoreData = true;
 
   @override
   void initState() {
@@ -96,10 +97,16 @@ class _MyHomePageState extends State<MyHomePage> {
     });
   }
 
-  void setWeekNumber(bool increse) {
-    int newWeekNumber = increse ? _weekNumber + 1 : _weekNumber - 1;
+  void setWeekNumber({bool increase}) {
+    int newWeekNumber = increase ? _weekNumber + 1 : _weekNumber - 1;
     setState(() {
       _weekNumber = newWeekNumber;
+    });
+  }
+
+  void isThereMoreDataToDisplay(bool isThere) {
+    setState(() {
+      _isThereDataMoreData = isThere;
     });
   }
 
@@ -137,10 +144,8 @@ class _MyHomePageState extends State<MyHomePage> {
                       chartType: ChartType.today,
                     ),
                     new UnlocksChart(
-                      unlockData: _unlockData,
-                      chartType: ChartType.today,
-                    ),
-                    new StatsSection(averageUnlockCount: _recordCount - 10)
+                        unlockData: _unlockData, chartType: ChartType.today),
+                    // new StatsSection(averageUnlockCount: _recordCount - 10)
                   ],
                 ),
               ),
@@ -153,61 +158,10 @@ class _MyHomePageState extends State<MyHomePage> {
                       chartType: ChartType.week,
                     ),
                     new UnlocksChart(
-                      unlockData: _unlockData,
-                      chartType: ChartType.week,
-                      weekNumber: _weekNumber,
-                    ),
-                    Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceAround,
-                        children: [
-                          ButtonTheme(
-                            textTheme: Theme.of(context).buttonTheme.textTheme,
-                            colorScheme: Theme.of(context).colorScheme,
-                            buttonColor: Theme.of(context).textSelectionColor,
-                            minWidth: 130.0,
-                            height: 40.0,
-                            child: RaisedButton(
-                              child: Row(
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  crossAxisAlignment: CrossAxisAlignment.center,
-                                  children: <Widget>[
-                                    Icon(Icons.arrow_back_ios),
-                                    Text("Previous")
-                                  ]),
-                              elevation: 2.0,
-                              autofocus: false,
-                              clipBehavior: Clip.hardEdge,
-                              shape: RoundedRectangleBorder(
-                                  borderRadius:
-                                      new BorderRadius.circular(26 / 1.5)),
-                              onPressed: () => setWeekNumber(false),
-                            ),
-                          ),
-                          ButtonTheme(
-                              textTheme:
-                                  Theme.of(context).buttonTheme.textTheme,
-                              colorScheme: Theme.of(context).colorScheme,
-                              buttonColor: Theme.of(context).textSelectionColor,
-                              minWidth: 130.0,
-                              height: 40.0,
-                              child: RaisedButton(
-                                child: Row(
-                                    mainAxisAlignment: MainAxisAlignment.center,
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.center,
-                                    children: <Widget>[
-                                      Text("Next"),
-                                      Icon(Icons.arrow_forward_ios),
-                                    ]),
-                                elevation: 2.0,
-                                autofocus: false,
-                                clipBehavior: Clip.hardEdge,
-                                shape: RoundedRectangleBorder(
-                                    borderRadius:
-                                        new BorderRadius.circular(26 / 1.5)),
-                                onPressed: () => setWeekNumber(true),
-                              )),
-                        ]),
+                        unlockData: _unlockData,
+                        chartType: ChartType.week,
+                        weekNumber: _weekNumber,
+                        callback: isThereMoreDataToDisplay),
                     // new StatsSection(averageUnlockCount: _recordCount - 10)
                   ],
                 ),
@@ -224,7 +178,7 @@ class _MyHomePageState extends State<MyHomePage> {
                       unlockData: _unlockData,
                       chartType: ChartType.month,
                     ),
-                    new StatsSection(averageUnlockCount: _recordCount - 10)
+                    // new StatsSection(averageUnlockCount: _recordCount - 10)
                   ],
                 ),
               ),
@@ -240,7 +194,7 @@ class _MyHomePageState extends State<MyHomePage> {
                       unlockData: _unlockData,
                       chartType: ChartType.year,
                     ),
-                    new StatsSection(averageUnlockCount: _recordCount - 10)
+                    // new StatsSection(averageUnlockCount: _recordCount - 10)
                   ],
                 ),
               ),
