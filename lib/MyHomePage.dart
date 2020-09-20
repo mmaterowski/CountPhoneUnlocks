@@ -30,7 +30,7 @@ class _MyHomePageState extends State<MyHomePage> {
   static const platform = const MethodChannel('UserActiveChannel');
   int _recordCount = 0;
   List<UnlockRecord> _unlockData = new List<UnlockRecord>();
-  ChartType _chartType = ChartType.today;
+  ChartType _chartType = ChartType.day;
   int _weekNumber = getWeekNumber(DateTime.now());
   bool _isThereDataMoreData = true;
 
@@ -141,10 +141,10 @@ class _MyHomePageState extends State<MyHomePage> {
                   children: <Widget>[
                     new CountSection(
                       unlockData: _unlockData,
-                      chartType: ChartType.today,
+                      chartType: ChartType.day,
                     ),
                     new UnlocksChart(
-                        unlockData: _unlockData, chartType: ChartType.today),
+                        unlockData: _unlockData, chartType: ChartType.day),
                     // new StatsSection(averageUnlockCount: _recordCount - 10)
                   ],
                 ),

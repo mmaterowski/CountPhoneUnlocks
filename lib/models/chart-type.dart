@@ -1,1 +1,1 @@
-enum ChartType { today, week, month, year }
+enum ChartType { day, week, month, year }

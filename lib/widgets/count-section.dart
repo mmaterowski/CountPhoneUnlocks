@@ -73,7 +73,7 @@ callbackAfterInit(Function method) {
 
 String _getText(ChartType chartType) {
   switch (chartType) {
-    case ChartType.today:
+    case ChartType.day:
       return 'today';
     case ChartType.week:
       return 'this week';
@@ -88,7 +88,7 @@ String _getText(ChartType chartType) {
 
 int _getCount(ChartType chartType, List<UnlockRecord> unlockData) {
   switch (chartType) {
-    case ChartType.today:
+    case ChartType.day:
       return getTodayCount(unlockData);
     case ChartType.week:
       return getWeekCount(unlockData);

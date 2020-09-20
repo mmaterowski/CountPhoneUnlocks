@@ -42,7 +42,7 @@ class _UnlocksChartState extends State<UnlocksChart> {
   int _currentWeek;
   int _currentMonth;
   int _currentYear;
-  int _currentDay;
+  DateTime _currentDate;
   bool _isThereDataMoreDataInFuture = false;
   bool _isThereDataMoreDataInPast = true;
   UnlockRecordsService unlockService;
@@ -53,10 +53,36 @@ class _UnlocksChartState extends State<UnlocksChart> {
     _currentWeek = this.widget.weekNumber;
     _currentMonth = this.widget.monthNumber;
     _currentYear = this.widget.yearNumber;
-    _currentDay = this.widget.dayNumber;
+    _currentDate = DateTime.now();
   }
 
-  void setWeekNumber({bool increase}) {
+  void setChartDisplayPeriod({bool increase}) {
+    switch (this.widget.chartType) {
+      case ChartType.day:
+        setForDay(increase);
+        break;
+      case ChartType.week:
+        setForWeek(increase);
+        break;
+      default:
+    }
+  }
+
+  setForDay(bool increase) {
+    DateTime newDate = increase
+        ? _currentDate.add(Duration(days: 1))
+        : _currentDate.subtract(Duration(days: 1));
+
+    setState(() {
+      _currentDate = newDate;
+      _isThereDataMoreDataInFuture =
+          unlockService.isThereMoreRecordsAfter(newDate);
+      _isThereDataMoreDataInPast =
+          unlockService.isThereMoreRecordsBefore(newDate);
+    });
+  }
+
+  setForWeek(bool increase) {
     int newWeekNumber = increase ? _currentWeek + 1 : _currentWeek - 1;
     bool isThereMoreDataInFuture = true;
     bool isThereMoreDataInPast = true;
@@ -86,7 +112,7 @@ class _UnlocksChartState extends State<UnlocksChart> {
 
   List<PhoneUnlocks> buildChartData() {
     switch (this.widget.chartType) {
-      case ChartType.today:
+      case ChartType.day:
         return buildTodaySeries();
         break;
       case ChartType.week:
@@ -119,7 +145,7 @@ class _UnlocksChartState extends State<UnlocksChart> {
                 lineStyle: new charts.LineStyleSpec(
                     color: charts.MaterialPalette.black))),
         animate: true,
-        animationDuration: new Duration(milliseconds: 500),
+        animationDuration: new Duration(milliseconds: 400),
         defaultInteractions: false,
         selectionModels: [
           charts.SelectionModelConfig(
@@ -141,10 +167,14 @@ class _UnlocksChartState extends State<UnlocksChart> {
     return Column(children: [
       Padding(
         padding: EdgeInsets.all(32.0),
-        child: SizedBox(
-          height: 200.0,
-          child: chart,
-        ),
+        child: Column(children: [
+          Text(
+            formatADate(_currentDate, "dd MMM yyy"),
+            style: Theme.of(context).textTheme.caption,
+            textAlign: TextAlign.center,
+          ),
+          SizedBox(height: 200.0, child: chart)
+        ]),
       ),
       Row(mainAxisAlignment: MainAxisAlignment.spaceAround, children: [
         ButtonTheme(
@@ -168,7 +198,7 @@ class _UnlocksChartState extends State<UnlocksChart> {
             shape: RoundedRectangleBorder(
                 borderRadius: new BorderRadius.circular(26 / 1.5)),
             onPressed: _isThereDataMoreDataInPast
-                ? () => setWeekNumber(increase: false)
+                ? () => setChartDisplayPeriod(increase: false)
                 : null,
           ),
         ),
@@ -192,7 +222,7 @@ class _UnlocksChartState extends State<UnlocksChart> {
               shape: RoundedRectangleBorder(
                   borderRadius: new BorderRadius.circular(26 / 1.5)),
               onPressed: _isThereDataMoreDataInFuture
-                  ? () => setWeekNumber(increase: true)
+                  ? () => setChartDisplayPeriod(increase: true)
                   : null),
         ),
       ]),
@@ -236,7 +266,7 @@ class _UnlocksChartState extends State<UnlocksChart> {
       ));
       tickProviderSpec = charts.DayTickProviderSpec(increments: [1]);
     }
-    if (type == ChartType.today) {
+    if (type == ChartType.day) {
       tickFormatterSpec = charts.AutoDateTimeTickFormatterSpec(
           hour: new charts.TimeFormatterSpec(
               format: "HH:mm", transitionFormat: "HH:mm"));
@@ -304,19 +334,6 @@ class _UnlocksChartState extends State<UnlocksChart> {
     return data;
   }
 
-  Map<String, List<UnlockRecord>> getThisMonthRecords(
-      List<UnlockRecord> records) {
-    var groupedRecords =
-        groupBy(records, (UnlockRecord obj) => (obj.timestamp.month));
-    var thisMonth = DateTime.now().month;
-    if (groupedRecords.containsKey(thisMonth)) {
-      var thisMonthRecords = groupedRecords[thisMonth];
-      return groupBy(thisMonthRecords,
-          (UnlockRecord obj) => getStringFromDate(obj.timestamp));
-    }
-    return Map<String, List<UnlockRecord>>();
-  }
-
   List<PhoneUnlocks> buildWeekSeries() {
     var data = new List<PhoneUnlocks>();
     var weekRecords = unlockService.groupByWeek(this._currentWeek);
@@ -348,21 +365,9 @@ class _UnlocksChartState extends State<UnlocksChart> {
         DateTime.parse(weekRecords.keys.elementAt(i)), counts));
   }
 
-  Map<String, List<UnlockRecord>> getWeekRecords(List<UnlockRecord> records,
-      [int numberOfWeek]) {
-    var groupedRecords =
-        groupBy(records, (UnlockRecord obj) => getWeekNumber(obj.timestamp));
-    if (groupedRecords.containsKey(numberOfWeek)) {
-      var thisWeekRecords = groupedRecords[numberOfWeek];
-      return groupBy(thisWeekRecords,
-          (UnlockRecord obj) => getStringFromDate(obj.timestamp));
-    }
-    return Map<String, List<UnlockRecord>>();
-  }
-
   List<PhoneUnlocks> buildTodaySeries() {
     List<PhoneUnlocks> data = new List<PhoneUnlocks>();
-    var todayRecords = unlockService.groupByDay(DateTime.now());
+    var todayRecords = unlockService.groupByDay(_currentDate);
     for (var key in todayRecords.keys) {
       var date = new DateTime(
           DateTime.now().year, DateTime.now().month, DateTime.now().day, key);
