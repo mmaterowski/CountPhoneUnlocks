@@ -15,6 +15,9 @@ class UnlocksChart extends StatefulWidget {
   final List<UnlockRecord> unlockData;
   final ChartType chartType;
   final int weekNumber;
+  final int monthNumber;
+  final int yearNumber;
+  final int dayNumber;
   final Function(bool) callback;
   final UnlockRecordsService service = UnlockRecordsService();
 
@@ -23,6 +26,9 @@ class UnlocksChart extends StatefulWidget {
     this.unlockData,
     this.chartType,
     this.weekNumber,
+    this.monthNumber,
+    this.yearNumber,
+    this.dayNumber,
     this.callback,
   }) : super(key: key) {
     this.service.setData(this.unlockData);
@@ -33,70 +39,79 @@ class UnlocksChart extends StatefulWidget {
 }
 
 class _UnlocksChartState extends State<UnlocksChart> {
-  int _currentWeekNumber;
+  int _currentWeek;
+  int _currentMonth;
+  int _currentYear;
+  int _currentDay;
   bool _isThereDataMoreDataInFuture = false;
   bool _isThereDataMoreDataInPast = true;
+  UnlockRecordsService unlockService;
 
   @override
   void initState() {
     super.initState();
-    _currentWeekNumber = this.widget.weekNumber;
+    _currentWeek = this.widget.weekNumber;
+    _currentMonth = this.widget.monthNumber;
+    _currentYear = this.widget.yearNumber;
+    _currentDay = this.widget.dayNumber;
   }
 
   void setWeekNumber({bool increase}) {
-    int newWeekNumber =
-        increase ? _currentWeekNumber + 1 : _currentWeekNumber - 1;
+    int newWeekNumber = increase ? _currentWeek + 1 : _currentWeek - 1;
     bool isThereMoreDataInFuture = true;
     bool isThereMoreDataInPast = true;
 
     if (increase) {
       var endOfThisWeek = getDateByWeekNumber(
-          weeknumber: _currentWeekNumber + 1,
+          weeknumber: _currentWeek + 1,
           year: DateTime.now().year,
           start: false);
-      if (!this.widget.service.isThereMoreRecordsAfter(endOfThisWeek)) {
+      if (!unlockService.isThereMoreRecordsAfter(endOfThisWeek)) {
         isThereMoreDataInFuture = false;
       }
     } else {
       var startOfThisWeek = getDateByWeekNumber(
-          weeknumber: _currentWeekNumber - 1,
-          year: DateTime.now().year,
-          start: true);
-      if (!this.widget.service.isThereMoreRecordsBefore(startOfThisWeek)) {
+          weeknumber: _currentWeek - 1, year: DateTime.now().year, start: true);
+      if (!unlockService.isThereMoreRecordsBefore(startOfThisWeek)) {
         isThereMoreDataInPast = false;
       }
     }
 
     setState(() {
-      _currentWeekNumber = newWeekNumber;
+      _currentWeek = newWeekNumber;
       _isThereDataMoreDataInFuture = isThereMoreDataInFuture;
       _isThereDataMoreDataInPast = isThereMoreDataInPast;
     });
+  }
+
+  List<PhoneUnlocks> buildChartData() {
+    switch (this.widget.chartType) {
+      case ChartType.today:
+        return buildTodaySeries();
+        break;
+      case ChartType.week:
+        return buildWeekSeries();
+        break;
+      case ChartType.month:
+        return buildMonthSeries();
+      case ChartType.year:
+        return buildYearSeries();
+      default:
+        return List<PhoneUnlocks>();
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     List<PhoneUnlocks> data = new List<PhoneUnlocks>();
     charts.TimeSeriesChart chart;
-    if (this.widget.chartType == ChartType.today) {
-      data = buildTodaySeries(this.widget.unlockData);
-    }
-    if (this.widget.chartType == ChartType.week) {
-      data = buildWeekSeries(
-          this.widget.unlockData, this.widget.callback, _currentWeekNumber);
-    }
-    if (this.widget.chartType == ChartType.month) {
-      data = buildMonthSeries(this.widget.unlockData);
-    }
-    if (this.widget.chartType == ChartType.year) {
-      data = buildYearSeries(this.widget.unlockData);
-    }
+    unlockService = this.widget.service;
+    data = buildChartData();
     var series = createSeries(data);
 
     chart = charts.TimeSeriesChart(series,
         defaultRenderer: new charts.BarRendererConfig<DateTime>(),
-        domainAxis:
-            buildAxisSpec(this.widget.chartType, data, this.widget.weekNumber),
+        domainAxis: buildAxisSpec(this.widget.chartType, data),
         primaryMeasureAxis: new charts.NumericAxisSpec(
             renderSpec: new charts.GridlineRendererSpec(
                 labelStyle: new charts.TextStyleSpec(
@@ -184,8 +199,7 @@ class _UnlocksChartState extends State<UnlocksChart> {
     ]);
   }
 
-  AxisSpec<dynamic> buildAxisSpec(
-      ChartType type, List<PhoneUnlocks> data, int numberOfTheWeek) {
+  AxisSpec<dynamic> buildAxisSpec(ChartType type, List<PhoneUnlocks> data) {
     RenderSpec<DateTime> renderSpec = new charts.SmallTickRendererSpec(
         minimumPaddingBetweenLabelsPx: 0,
         labelStyle: new charts.TextStyleSpec(
@@ -214,7 +228,7 @@ class _UnlocksChartState extends State<UnlocksChart> {
 
     if (type == ChartType.week) {
       var format =
-          numberOfTheWeek == getWeekNumber(DateTime.now()) ? 'EE' : 'dd.MM';
+          _currentWeek == getWeekNumber(DateTime.now()) ? 'EE' : 'dd.MM';
       tickFormatterSpec = AutoDateTimeTickFormatterSpec(
           day: TimeFormatterSpec(
         format: format,
@@ -226,7 +240,6 @@ class _UnlocksChartState extends State<UnlocksChart> {
       tickFormatterSpec = charts.AutoDateTimeTickFormatterSpec(
           hour: new charts.TimeFormatterSpec(
               format: "HH:mm", transitionFormat: "HH:mm"));
-      renderSpec = new charts.SmallTickRendererSpec();
     }
 
     return charts.DateTimeAxisSpec(
@@ -248,61 +261,45 @@ class _UnlocksChartState extends State<UnlocksChart> {
     ];
   }
 
-  List<PhoneUnlocks> buildYearSeries(List<UnlockRecord> unlockData) {
+  List<PhoneUnlocks> buildYearSeries() {
     List<PhoneUnlocks> data = new List<PhoneUnlocks>();
-    var thisYearRecords = getThisYearRecords(unlockData);
-    for (var i = 0; i < 12; i++) {
-      int counts = 0;
+    var thisYearRecords = unlockService.groupByYear(DateTime.now().year);
+
+    for (var i = 0; i < DateTime.monthsPerYear; i++) {
       if (thisYearRecords.containsKey(i)) {
-        counts = thisYearRecords[i].length;
-        data.add(
-            new PhoneUnlocks(new DateTime(DateTime.now().year, i + 1), counts));
+        data.add(new PhoneUnlocks(new DateTime(DateTime.now().year, i + 1),
+            thisYearRecords[i].length));
       }
     }
     addEmtyRecordsIfNeeded(data);
-
     return data;
   }
 
   void addEmtyRecordsIfNeeded(List<PhoneUnlocks> data) {
     if (data.length == 1) {
-      if (data[0].timestamp.month != 12) {
-        data.add(new PhoneUnlocks(
-            new DateTime(data[0].timestamp.year, data[0].timestamp.month + 1),
-            0));
+      var date = data.first.timestamp;
+      if (date.month != DateTime.december) {
+        data.add(new PhoneUnlocks(new DateTime(date.year, date.month + 1), 0));
       }
-      if (data[0].timestamp.month != 0)
-        data.add(new PhoneUnlocks(
-            new DateTime(data[0].timestamp.year, data[0].timestamp.month - 1),
-            0));
+      if (date.month != DateTime.january)
+        data.add(new PhoneUnlocks(new DateTime(date.year, date.month - 1), 0));
     }
   }
 
-  Map<int, List<UnlockRecord>> getThisYearRecords(List<UnlockRecord> records) {
-    var groupedRecords =
-        groupBy(records, (UnlockRecord obj) => (obj.timestamp.year));
-    var thisYear = DateTime.now().year;
-    if (groupedRecords.containsKey(thisYear)) {
-      var thisYearRecords = groupedRecords[thisYear];
-      return groupBy(
-          thisYearRecords, (UnlockRecord obj) => obj.timestamp.month);
-    }
-    return Map<int, List<UnlockRecord>>();
-  }
-
-  List<PhoneUnlocks> buildMonthSeries(List<UnlockRecord> unlockData) {
+  List<PhoneUnlocks> buildMonthSeries() {
     List<PhoneUnlocks> data = new List<PhoneUnlocks>();
-    var thisMonthRecords = getThisMonthRecords(unlockData);
+    var monthRecords =
+        unlockService.groupByMonth(DateTime.now().month, DateTime.now().year);
     var lastDayOfTheMonth = lastDayOfMonth(DateTime.now()).day;
     for (var i = 0; i < lastDayOfTheMonth; i++) {
       int counts = 0;
-      if (thisMonthRecords.length - i <= 0) {
+      if (monthRecords.length - i <= 0) {
         continue;
       }
 
-      counts = thisMonthRecords[thisMonthRecords.keys.elementAt(i)].length;
+      counts = monthRecords[monthRecords.keys.elementAt(i)].length;
       data.add(new PhoneUnlocks(
-          DateTime.parse(thisMonthRecords.keys.elementAt(i)), counts));
+          DateTime.parse(monthRecords.keys.elementAt(i)), counts));
     }
     return data;
   }
@@ -320,11 +317,10 @@ class _UnlocksChartState extends State<UnlocksChart> {
     return Map<String, List<UnlockRecord>>();
   }
 
-  List<PhoneUnlocks> buildWeekSeries(List<UnlockRecord> unlockData,
-      Function(bool) onPreviousClick, int numberOfWeek) {
+  List<PhoneUnlocks> buildWeekSeries() {
     var data = new List<PhoneUnlocks>();
-    var weekRecords = this.widget.service.groupByWeek(numberOfWeek);
-    for (var i = 0; i < 7; i++) {
+    var weekRecords = unlockService.groupByWeek(this._currentWeek);
+    for (int i = 0; i < DateTime.daysPerWeek; i++) {
       if (shouldAddEmptyDay(weekRecords, data, i)) {
         addEmptyDayRecordOnNextDay(data);
         continue;
@@ -364,9 +360,9 @@ class _UnlocksChartState extends State<UnlocksChart> {
     return Map<String, List<UnlockRecord>>();
   }
 
-  List<PhoneUnlocks> buildTodaySeries(List<UnlockRecord> unlockData) {
+  List<PhoneUnlocks> buildTodaySeries() {
     List<PhoneUnlocks> data = new List<PhoneUnlocks>();
-    var todayRecords = this.widget.service.groupByDay(DateTime.now());
+    var todayRecords = unlockService.groupByDay(DateTime.now());
     for (var key in todayRecords.keys) {
       var date = new DateTime(
           DateTime.now().year, DateTime.now().month, DateTime.now().day, key);

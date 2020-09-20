@@ -42,4 +42,25 @@ class UnlockRecordsService {
   bool isThereMoreRecordsAfter(DateTime date) {
     return this._records.any((r) => r.timestamp.isAfter(date));
   }
+
+  Map<int, List<UnlockRecord>> groupByYear(int year) {
+    var groupedRecords =
+        groupBy(_records, (UnlockRecord obj) => (obj.timestamp.year));
+
+    if (groupedRecords.containsKey(year)) {
+      return groupBy(
+          groupedRecords[year], (UnlockRecord obj) => obj.timestamp.month);
+    }
+    return Map<int, List<UnlockRecord>>();
+  }
+
+  Map<String, List<UnlockRecord>> groupByMonth(int month, int year) {
+    var groupedByYear = this.groupByYear(year);
+
+    if (groupedByYear.containsKey(month)) {
+      return groupBy(groupedByYear[month],
+          (UnlockRecord obj) => getStringFromDate(obj.timestamp));
+    }
+    return Map<String, List<UnlockRecord>>();
+  }
 }
