@@ -295,10 +295,10 @@ class _UnlocksChartState extends State<UnlocksChart> {
     List<PhoneUnlocks> data = new List<PhoneUnlocks>();
     var thisYearRecords = unlockService.groupByYear(DateTime.now().year);
 
-    for (var i = 0; i < DateTime.monthsPerYear; i++) {
+    for (var i = 1; i <= DateTime.monthsPerYear; i++) {
       if (thisYearRecords.containsKey(i)) {
-        data.add(new PhoneUnlocks(new DateTime(DateTime.now().year, i + 1),
-            thisYearRecords[i].length));
+        data.add(new PhoneUnlocks(
+            new DateTime(DateTime.now().year, i), thisYearRecords[i].length));
       }
     }
     addEmtyRecordsIfNeeded(data);
