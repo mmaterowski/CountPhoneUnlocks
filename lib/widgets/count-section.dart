@@ -1,32 +1,82 @@
-import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
-import 'package:intl/intl.dart';
 import 'package:rHabbit/models/chart-type.dart';
+import 'package:rHabbit/models/rhabbit-state.dart';
 import 'package:rHabbit/models/unlock-record.dart';
+import 'package:rHabbit/services/unlock-records-service.dart';
 import 'package:rHabbit/utils/date-time-utils.dart';
 import 'package:rHabbit/widgets/animated-count.dart';
 
 class CountSection extends StatefulWidget {
   final List<UnlockRecord> unlockData;
   final ChartType chartType;
+  final RhabbitState state;
+  final UnlockRecordsService service = UnlockRecordsService();
+
   @override
-  CountSection({Key key, this.unlockData, this.chartType}) : super(key: key);
+  CountSection({Key key, this.unlockData, this.chartType, this.state})
+      : super(key: key) {
+    this.service.setData(this.unlockData);
+  }
 
   @override
   _CountSectionState createState() => _CountSectionState();
 }
 
 class _CountSectionState extends State<CountSection> {
-  @override
-  void initState() {
-    super.initState();
+  String _getText(ChartType chartType) {
+    switch (chartType) {
+      case ChartType.day:
+        if (DateTime.now().day == widget.state.getDate().day) {
+          return 'today';
+        }
+        if (DateTime.now().day - 1 == widget.state.getDate().day) {
+          return 'yesterday';
+        }
+        return 'at ' + formatADate(widget.state.getDate(), 'dd MMM yyyy');
+      case ChartType.week:
+        var thisWeekNumber = getWeekNumber(DateTime.now());
+        if (thisWeekNumber == widget.state.getWeek()) {
+          return 'this week';
+        }
+        if (thisWeekNumber - 1 == widget.state.getWeek()) {
+          return 'last week';
+        }
+        var weekStart = getDateByWeekNumber(
+            weeknumber: widget.state.getWeek(),
+            year: widget.state.getYear(),
+            start: true);
+        var weekEnd = getDateByWeekNumber(
+            weeknumber: widget.state.getWeek(),
+            year: widget.state.getYear(),
+            start: false);
+        var formattedWeekStart = formatADate(weekStart, 'd MMM');
+        var formattedWeekEnd = formatADate(weekEnd, 'd MMM yyyy');
+        return 'between \n' + formattedWeekStart + " - " + formattedWeekEnd;
+      case ChartType.month:
+        return 'this month';
+      case ChartType.year:
+        return 'this year';
+      default:
+        return '???';
+    }
   }
 
-//MAKE WIDGET REFRESH/ANIMATE
-  int _count = 0;
-  String _text = '?';
-  ChartType _chartType;
+  int _getCount(ChartType chartType) {
+    switch (chartType) {
+      case ChartType.day:
+        return widget.service.getTodayCount(widget.state.getDate());
+      case ChartType.week:
+        return widget.service.getWeekCount(widget.state.getWeek());
+      case ChartType.month:
+        return widget.service
+            .getMonthCount(widget.state.getMonth(), widget.state.getYear());
+      case ChartType.year:
+        return widget.service.getYearCount(widget.state.getYear());
+      default:
+        return 0;
+    }
+  }
 
   Widget build(BuildContext context) {
     return Column(children: [
@@ -50,7 +100,7 @@ class _CountSectionState extends State<CountSection> {
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
             AnimatedCount(
-                count: _getCount(this.widget.chartType, this.widget.unlockData),
+                count: _getCount(this.widget.chartType),
                 duration: Duration(milliseconds: 500))
           ],
         ),
@@ -69,74 +119,4 @@ callbackAfterInit(Function method) {
       SchedulerPhase.persistentCallbacks) {
     SchedulerBinding.instance.addPostFrameCallback((_) => method());
   }
-}
-
-String _getText(ChartType chartType) {
-  switch (chartType) {
-    case ChartType.day:
-      return 'today';
-    case ChartType.week:
-      return 'this week';
-    case ChartType.month:
-      return 'this month';
-    case ChartType.year:
-      return 'this year';
-    default:
-      return '???';
-  }
-}
-
-int _getCount(ChartType chartType, List<UnlockRecord> unlockData) {
-  switch (chartType) {
-    case ChartType.day:
-      return getTodayCount(unlockData);
-    case ChartType.week:
-      return getWeekCount(unlockData);
-    case ChartType.month:
-      return getThisMonthCount(unlockData);
-    case ChartType.year:
-      return getThisYearCount(unlockData);
-    default:
-      return 0;
-  }
-}
-
-int getTodayCount(List<UnlockRecord> records) {
-  var groupedRecords =
-      groupBy(records, (UnlockRecord obj) => getStringFromDate(obj.timestamp));
-  var formatter = DateFormat('yyyy-MM-dd');
-  var today = formatter.format(DateTime.now());
-  if (groupedRecords.containsKey(today)) {
-    return groupedRecords[today].length;
-  }
-  return 0;
-}
-
-int getWeekCount(List<UnlockRecord> records, [int numberOfWeek]) {
-  var groupedRecords =
-      groupBy(records, (UnlockRecord obj) => getWeekNumber(obj.timestamp));
-  if (groupedRecords.containsKey(numberOfWeek)) {
-    return groupedRecords[numberOfWeek].length;
-  }
-  return 0;
-}
-
-int getThisMonthCount(List<UnlockRecord> records) {
-  var groupedRecords =
-      groupBy(records, (UnlockRecord obj) => (obj.timestamp.month));
-  var thisMonth = DateTime.now().month;
-  if (groupedRecords.containsKey(thisMonth)) {
-    return groupedRecords[thisMonth].length;
-  }
-  return 0;
-}
-
-int getThisYearCount(List<UnlockRecord> records) {
-  var groupedRecords =
-      groupBy(records, (UnlockRecord obj) => (obj.timestamp.year));
-  var thisYear = DateTime.now().year;
-  if (groupedRecords.containsKey(thisYear)) {
-    return groupedRecords[thisYear].length;
-  }
-  return 0;
 }

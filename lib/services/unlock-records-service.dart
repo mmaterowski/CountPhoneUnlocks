@@ -35,14 +35,6 @@ class UnlockRecordsService {
     return Map<String, List<UnlockRecord>>();
   }
 
-  bool isThereMoreRecordsBefore(DateTime date) {
-    return this._records.any((r) => r.timestamp.isBefore(date));
-  }
-
-  bool isThereMoreRecordsAfter(DateTime date) {
-    return this._records.any((r) => r.timestamp.isAfter(date));
-  }
-
   Map<int, List<UnlockRecord>> groupByYear(int year) {
     var groupedRecords =
         groupBy(_records, (UnlockRecord obj) => (obj.timestamp.year));
@@ -62,5 +54,48 @@ class UnlockRecordsService {
           (UnlockRecord obj) => getStringFromDate(obj.timestamp));
     }
     return Map<String, List<UnlockRecord>>();
+  }
+
+  int getTodayCount(DateTime date) {
+    var records = groupBy(
+        _records, (UnlockRecord obj) => getStringFromDate(obj.timestamp));
+    var today = formatADate(date, 'yyyy-MM-dd');
+    if (records.containsKey(today)) {
+      return records[today].length;
+    }
+    return 0;
+  }
+
+  int getWeekCount(weekNumber) {
+    var groupedRecords =
+        groupBy(_records, (UnlockRecord obj) => getWeekNumber(obj.timestamp));
+    if (groupedRecords.containsKey(weekNumber)) {
+      return groupedRecords[weekNumber].length;
+    }
+    return 0;
+  }
+
+  int getMonthCount(int month, int year) {
+    var groupedByYear = this.groupByYear(year);
+    if (groupedByYear.containsKey(month)) {
+      return groupedByYear[month].length;
+    }
+    return 0;
+  }
+
+  int getYearCount(int year) {
+    var records = this.groupByYear(year);
+    if (records.containsKey(year)) {
+      return records[year].length;
+    }
+    return 0;
+  }
+
+  bool isThereMoreRecordsBefore(DateTime date) {
+    return this._records.any((r) => r.timestamp.isBefore(date));
+  }
+
+  bool isThereMoreRecordsAfter(DateTime date) {
+    return this._records.any((r) => r.timestamp.isAfter(date));
   }
 }

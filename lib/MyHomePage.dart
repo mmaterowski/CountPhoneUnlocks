@@ -5,13 +5,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
-import 'package:rHabbit/utils/date-time-utils.dart';
+import 'package:rHabbit/models/rhabbit-state.dart';
 import 'package:rHabbit/widgets/app-title.dart';
 import 'package:rHabbit/widgets/bottom-navigation.dart';
 import 'package:rHabbit/widgets/count-section.dart';
 import 'package:rHabbit/widgets/drawer.dart';
 import 'package:rHabbit/widgets/profile-picture.dart';
-import 'package:rHabbit/widgets/stats-section.dart';
 import 'package:rHabbit/widgets/unlocks-chart.dart';
 import 'package:swipedetector/swipedetector.dart';
 
@@ -28,11 +27,9 @@ class MyHomePage extends StatefulWidget {
 
 class _MyHomePageState extends State<MyHomePage> {
   static const platform = const MethodChannel('UserActiveChannel');
-  int _recordCount = 0;
   List<UnlockRecord> _unlockData = new List<UnlockRecord>();
   ChartType _chartType = ChartType.day;
-  int _weekNumber = getWeekNumber(DateTime.now());
-  bool _isThereDataMoreData = true;
+  RhabbitState _state = RhabbitState(DateTime.now());
 
   @override
   void initState() {
@@ -40,8 +37,14 @@ class _MyHomePageState extends State<MyHomePage> {
     callbackAfterInit(_getRecordsCount);
   }
 
+  callbackAfterInit(Function method) {
+    if (SchedulerBinding.instance.schedulerPhase ==
+        SchedulerPhase.persistentCallbacks) {
+      SchedulerBinding.instance.addPostFrameCallback((_) => _getRecordsCount());
+    }
+  }
+
   Future<void> _getRecordsCount() async {
-    int count = 0;
     List<UnlockRecord> unlockData;
 
     try {
@@ -50,22 +53,13 @@ class _MyHomePageState extends State<MyHomePage> {
       List<UnlockRecord> unlockRecords =
           recordsMap.map((record) => UnlockRecord.fromJson(record)).toList();
       unlockData = unlockRecords;
-      count = getTodayCount(unlockRecords);
     } on PlatformException catch (e) {
       log(e.toString());
     }
 
     setState(() {
-      _recordCount = count;
       _unlockData = unlockData;
     });
-  }
-
-  callbackAfterInit(Function method) {
-    if (SchedulerBinding.instance.schedulerPhase ==
-        SchedulerPhase.persistentCallbacks) {
-      SchedulerBinding.instance.addPostFrameCallback((_) => _getRecordsCount());
-    }
   }
 
   void onSwipeRight() {
@@ -97,16 +91,9 @@ class _MyHomePageState extends State<MyHomePage> {
     });
   }
 
-  void setWeekNumber({bool increase}) {
-    int newWeekNumber = increase ? _weekNumber + 1 : _weekNumber - 1;
+  setRhabbitState(RhabbitState newState) {
     setState(() {
-      _weekNumber = newWeekNumber;
-    });
-  }
-
-  void isThereMoreDataToDisplay(bool isThere) {
-    setState(() {
-      _isThereDataMoreData = isThere;
+      this._state = newState;
     });
   }
 
@@ -122,7 +109,7 @@ class _MyHomePageState extends State<MyHomePage> {
               ],
               bottom: TabBar(
                 tabs: [
-                  Tab(text: "TODAY"),
+                  Tab(text: "DAY"),
                   Tab(text: "WEEK"),
                   Tab(text: "MONTH"),
                   Tab(text: "YEAR"),
@@ -142,26 +129,30 @@ class _MyHomePageState extends State<MyHomePage> {
                     new CountSection(
                       unlockData: _unlockData,
                       chartType: ChartType.day,
-                    ),
-                    new UnlocksChart(
-                        unlockData: _unlockData, chartType: ChartType.day),
-                    // new StatsSection(averageUnlockCount: _recordCount - 10)
-                  ],
-                ),
-              ),
-              Center(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: <Widget>[
-                    new CountSection(
-                      unlockData: _unlockData,
-                      chartType: ChartType.week,
+                      state: _state,
                     ),
                     new UnlocksChart(
                         unlockData: _unlockData,
+                        chartType: ChartType.day,
+                        state: _state,
+                        setRhabbitStateCallback: setRhabbitState),
+                    // new StatsSection(averageUnlockCount: _recordCount - 10)
+                  ],
+                ),
+              ),
+              Center(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: <Widget>[
+                    new CountSection(
+                        unlockData: _unlockData,
                         chartType: ChartType.week,
-                        weekNumber: _weekNumber,
-                        callback: isThereMoreDataToDisplay),
+                        state: _state),
+                    new UnlocksChart(
+                        unlockData: _unlockData,
+                        chartType: ChartType.week,
+                        state: _state,
+                        setRhabbitStateCallback: setRhabbitState),
                     // new StatsSection(averageUnlockCount: _recordCount - 10)
                   ],
                 ),
@@ -171,13 +162,14 @@ class _MyHomePageState extends State<MyHomePage> {
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: <Widget>[
                     new CountSection(
-                      unlockData: _unlockData,
-                      chartType: ChartType.month,
-                    ),
+                        unlockData: _unlockData,
+                        chartType: ChartType.month,
+                        state: _state),
                     new UnlocksChart(
-                      unlockData: _unlockData,
-                      chartType: ChartType.month,
-                    ),
+                        unlockData: _unlockData,
+                        chartType: ChartType.month,
+                        state: _state,
+                        setRhabbitStateCallback: setRhabbitState),
                     // new StatsSection(averageUnlockCount: _recordCount - 10)
                   ],
                 ),
@@ -187,13 +179,14 @@ class _MyHomePageState extends State<MyHomePage> {
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: <Widget>[
                     new CountSection(
-                      unlockData: _unlockData,
-                      chartType: ChartType.year,
-                    ),
+                        unlockData: _unlockData,
+                        chartType: ChartType.year,
+                        state: _state),
                     new UnlocksChart(
-                      unlockData: _unlockData,
-                      chartType: ChartType.year,
-                    ),
+                        unlockData: _unlockData,
+                        chartType: ChartType.year,
+                        state: _state,
+                        setRhabbitStateCallback: setRhabbitState),
                     // new StatsSection(averageUnlockCount: _recordCount - 10)
                   ],
                 ),

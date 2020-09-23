@@ -1,8 +1,8 @@
 import 'package:charts_flutter/flutter.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import "package:collection/collection.dart";
 import 'package:rHabbit/models/chart-type.dart';
+import 'package:rHabbit/models/rhabbit-state.dart';
 import 'package:rHabbit/models/unlock-record.dart';
 import 'package:rHabbit/services/unlock-records-service.dart';
 import 'package:rHabbit/utils/date-time-utils.dart';
@@ -14,22 +14,16 @@ import 'custom-circle-symbol-renderer.dart';
 class UnlocksChart extends StatefulWidget {
   final List<UnlockRecord> unlockData;
   final ChartType chartType;
-  final int weekNumber;
-  final int monthNumber;
-  final int yearNumber;
-  final int dayNumber;
-  final Function(bool) callback;
+  final RhabbitState state;
+  final Function(RhabbitState) setRhabbitStateCallback;
   final UnlockRecordsService service = UnlockRecordsService();
 
   UnlocksChart({
     Key key,
     this.unlockData,
     this.chartType,
-    this.weekNumber,
-    this.monthNumber,
-    this.yearNumber,
-    this.dayNumber,
-    this.callback,
+    this.state,
+    this.setRhabbitStateCallback,
   }) : super(key: key) {
     this.service.setData(this.unlockData);
   }
@@ -39,22 +33,8 @@ class UnlocksChart extends StatefulWidget {
 }
 
 class _UnlocksChartState extends State<UnlocksChart> {
-  int _currentWeek;
-  int _currentMonth;
-  int _currentYear;
-  DateTime _currentDate;
   bool _isThereDataMoreDataInFuture = false;
   bool _isThereDataMoreDataInPast = true;
-  UnlockRecordsService unlockService;
-
-  @override
-  void initState() {
-    super.initState();
-    _currentWeek = this.widget.weekNumber;
-    _currentMonth = this.widget.monthNumber;
-    _currentYear = this.widget.yearNumber;
-    _currentDate = DateTime.now();
-  }
 
   void setChartDisplayPeriod({bool increase}) {
     switch (this.widget.chartType) {
@@ -64,47 +44,85 @@ class _UnlocksChartState extends State<UnlocksChart> {
       case ChartType.week:
         setForWeek(increase);
         break;
+      case ChartType.month:
+        setForMonth(increase);
+        break;
+      case ChartType.year:
+        setForYear(increase);
+        break;
       default:
     }
   }
 
   setForDay(bool increase) {
-    DateTime newDate = increase
-        ? _currentDate.add(Duration(days: 1))
-        : _currentDate.subtract(Duration(days: 1));
+    increase
+        ? widget.state.add(Duration(days: 1))
+        : widget.state.subtract(Duration(days: 1));
+    this.widget.setRhabbitStateCallback(widget.state);
 
     setState(() {
-      _currentDate = newDate;
       _isThereDataMoreDataInFuture =
-          unlockService.isThereMoreRecordsAfter(newDate);
+          widget.service.isThereMoreRecordsAfter(widget.state.getDate());
       _isThereDataMoreDataInPast =
-          unlockService.isThereMoreRecordsBefore(newDate);
+          widget.service.isThereMoreRecordsBefore(widget.state.getDate());
+    });
+  }
+
+  setForYear(bool increase) {
+    var newYear =
+        increase ? widget.state.getYear() + 1 : widget.state.getYear() - 1;
+    widget.state.setYear(newYear);
+    this.widget.setRhabbitStateCallback(widget.state);
+
+    setState(() {
+      _isThereDataMoreDataInFuture =
+          widget.service.isThereMoreRecordsAfter(getLastDayOfYear(newYear));
+      _isThereDataMoreDataInPast =
+          widget.service.isThereMoreRecordsBefore(new DateTime(newYear));
+    });
+  }
+
+  setForMonth(bool increase) {
+    increase ? widget.state.addMonth() : widget.state.subtractMonth();
+    this.widget.setRhabbitStateCallback(widget.state);
+
+    setState(() {
+      _isThereDataMoreDataInFuture = widget.service
+          .isThereMoreRecordsAfter(lastDayOfMonth(this.widget.state.getDate()));
+      _isThereDataMoreDataInPast = widget.service.isThereMoreRecordsBefore(
+          new DateTime(
+              this.widget.state.getYear(), this.widget.state.getMonth()));
     });
   }
 
   setForWeek(bool increase) {
-    int newWeekNumber = increase ? _currentWeek + 1 : _currentWeek - 1;
+    int newWeekNumber =
+        increase ? widget.state.getWeek() + 1 : widget.state.getWeek() - 1;
     bool isThereMoreDataInFuture = true;
     bool isThereMoreDataInPast = true;
 
     if (increase) {
       var endOfThisWeek = getDateByWeekNumber(
-          weeknumber: _currentWeek + 1,
+          weeknumber: widget.state.getWeek() + 1,
           year: DateTime.now().year,
           start: false);
-      if (!unlockService.isThereMoreRecordsAfter(endOfThisWeek)) {
+      if (!widget.service.isThereMoreRecordsAfter(endOfThisWeek)) {
         isThereMoreDataInFuture = false;
       }
     } else {
       var startOfThisWeek = getDateByWeekNumber(
-          weeknumber: _currentWeek - 1, year: DateTime.now().year, start: true);
-      if (!unlockService.isThereMoreRecordsBefore(startOfThisWeek)) {
+          weeknumber: widget.state.getWeek() - 1,
+          year: DateTime.now().year,
+          start: true);
+      if (!widget.service.isThereMoreRecordsBefore(startOfThisWeek)) {
         isThereMoreDataInPast = false;
       }
     }
 
+    widget.state.setWeek(newWeekNumber);
+    widget.setRhabbitStateCallback(widget.state);
+
     setState(() {
-      _currentWeek = newWeekNumber;
       _isThereDataMoreDataInFuture = isThereMoreDataInFuture;
       _isThereDataMoreDataInPast = isThereMoreDataInPast;
     });
@@ -129,13 +147,10 @@ class _UnlocksChartState extends State<UnlocksChart> {
 
   @override
   Widget build(BuildContext context) {
-    List<PhoneUnlocks> data = new List<PhoneUnlocks>();
-    charts.TimeSeriesChart chart;
-    unlockService = this.widget.service;
-    data = buildChartData();
-    var series = createSeries(data);
+    List<PhoneUnlocks> data = buildChartData();
+    List<charts.Series<PhoneUnlocks, DateTime>> series = createSeries(data);
 
-    chart = charts.TimeSeriesChart(series,
+    TimeSeriesChart chart = charts.TimeSeriesChart(series,
         defaultRenderer: new charts.BarRendererConfig<DateTime>(),
         domainAxis: buildAxisSpec(this.widget.chartType, data),
         primaryMeasureAxis: new charts.NumericAxisSpec(
@@ -168,12 +183,12 @@ class _UnlocksChartState extends State<UnlocksChart> {
       Padding(
         padding: EdgeInsets.all(32.0),
         child: Column(children: [
+          SizedBox(height: 200.0, child: chart),
           Text(
-            formatADate(_currentDate, "dd MMM yyy"),
+            formatADate(widget.state.getDate(), "dd MMM yyy"),
             style: Theme.of(context).textTheme.caption,
             textAlign: TextAlign.center,
           ),
-          SizedBox(height: 200.0, child: chart)
         ]),
       ),
       Row(mainAxisAlignment: MainAxisAlignment.spaceAround, children: [
@@ -257,8 +272,9 @@ class _UnlocksChartState extends State<UnlocksChart> {
     }
 
     if (type == ChartType.week) {
-      var format =
-          _currentWeek == getWeekNumber(DateTime.now()) ? 'EE' : 'dd.MM';
+      var format = widget.state.getWeek() == getWeekNumber(DateTime.now())
+          ? 'EE'
+          : 'dd.MM';
       tickFormatterSpec = AutoDateTimeTickFormatterSpec(
           day: TimeFormatterSpec(
         format: format,
@@ -293,7 +309,7 @@ class _UnlocksChartState extends State<UnlocksChart> {
 
   List<PhoneUnlocks> buildYearSeries() {
     List<PhoneUnlocks> data = new List<PhoneUnlocks>();
-    var thisYearRecords = unlockService.groupByYear(DateTime.now().year);
+    var thisYearRecords = widget.service.groupByYear(DateTime.now().year);
 
     for (var i = 1; i <= DateTime.monthsPerYear; i++) {
       if (thisYearRecords.containsKey(i)) {
@@ -319,7 +335,7 @@ class _UnlocksChartState extends State<UnlocksChart> {
   List<PhoneUnlocks> buildMonthSeries() {
     List<PhoneUnlocks> data = new List<PhoneUnlocks>();
     var monthRecords =
-        unlockService.groupByMonth(DateTime.now().month, DateTime.now().year);
+        widget.service.groupByMonth(DateTime.now().month, DateTime.now().year);
     var lastDayOfTheMonth = lastDayOfMonth(DateTime.now()).day;
     for (var i = 0; i < lastDayOfTheMonth; i++) {
       int counts = 0;
@@ -336,7 +352,7 @@ class _UnlocksChartState extends State<UnlocksChart> {
 
   List<PhoneUnlocks> buildWeekSeries() {
     var data = new List<PhoneUnlocks>();
-    var weekRecords = unlockService.groupByWeek(this._currentWeek);
+    var weekRecords = widget.service.groupByWeek(widget.state.getWeek());
     for (int i = 0; i < DateTime.daysPerWeek; i++) {
       if (shouldAddEmptyDay(weekRecords, data, i)) {
         addEmptyDayRecordOnNextDay(data);
@@ -367,7 +383,7 @@ class _UnlocksChartState extends State<UnlocksChart> {
 
   List<PhoneUnlocks> buildTodaySeries() {
     List<PhoneUnlocks> data = new List<PhoneUnlocks>();
-    var todayRecords = unlockService.groupByDay(_currentDate);
+    var todayRecords = widget.service.groupByDay(widget.state.getDate());
     for (var key in todayRecords.keys) {
       var date = new DateTime(
           DateTime.now().year, DateTime.now().month, DateTime.now().day, key);
