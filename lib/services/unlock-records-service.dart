@@ -84,7 +84,7 @@ class UnlockRecordsService {
   }
 
   int getYearCount(int year) {
-    var records = this.groupByYear(year);
+    var records = groupBy(_records, (UnlockRecord obj) => (obj.timestamp.year));
     if (records.containsKey(year)) {
       return records[year].length;
     }

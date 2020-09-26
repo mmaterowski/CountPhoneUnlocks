@@ -4,6 +4,8 @@ import 'package:flutter/material.dart';
 import 'package:rHabbit/models/chart-type.dart';
 import 'package:rHabbit/models/rhabbit-state.dart';
 import 'package:rHabbit/models/unlock-record.dart';
+import 'package:rHabbit/services/axis-builder-service.dart';
+import 'package:rHabbit/services/display-period-service.dart';
 import 'package:rHabbit/services/unlock-records-service.dart';
 import 'package:rHabbit/utils/date-time-utils.dart';
 import '../models/phone-unlocks.dart';
@@ -17,6 +19,7 @@ class UnlocksChart extends StatefulWidget {
   final RhabbitState state;
   final Function(RhabbitState) setRhabbitStateCallback;
   final UnlockRecordsService service = UnlockRecordsService();
+  final DisplayPeriodService displayService = DisplayPeriodService();
 
   UnlocksChart({
     Key key,
@@ -149,10 +152,10 @@ class _UnlocksChartState extends State<UnlocksChart> {
   Widget build(BuildContext context) {
     List<PhoneUnlocks> data = buildChartData();
     List<charts.Series<PhoneUnlocks, DateTime>> series = createSeries(data);
-
+    var axisBuilder = new AxisBuilderService();
     TimeSeriesChart chart = charts.TimeSeriesChart(series,
         defaultRenderer: new charts.BarRendererConfig<DateTime>(),
-        domainAxis: buildAxisSpec(this.widget.chartType, data),
+        domainAxis: axisBuilder.buildAxisSpec(widget.chartType, widget.state),
         primaryMeasureAxis: new charts.NumericAxisSpec(
             renderSpec: new charts.GridlineRendererSpec(
                 labelStyle: new charts.TextStyleSpec(
@@ -185,7 +188,7 @@ class _UnlocksChartState extends State<UnlocksChart> {
         child: Column(children: [
           SizedBox(height: 200.0, child: chart),
           Text(
-            formatADate(widget.state.getDate(), "dd MMM yyy"),
+            widget.displayService.getRawPeriod(widget.chartType, widget.state),
             style: Theme.of(context).textTheme.caption,
             textAlign: TextAlign.center,
           ),
@@ -242,56 +245,6 @@ class _UnlocksChartState extends State<UnlocksChart> {
         ),
       ]),
     ]);
-  }
-
-  AxisSpec<dynamic> buildAxisSpec(ChartType type, List<PhoneUnlocks> data) {
-    RenderSpec<DateTime> renderSpec = new charts.SmallTickRendererSpec(
-        minimumPaddingBetweenLabelsPx: 0,
-        labelStyle: new charts.TextStyleSpec(
-            fontSize: 12, color: charts.MaterialPalette.black),
-        lineStyle:
-            new charts.LineStyleSpec(color: charts.MaterialPalette.black));
-
-    AutoDateTimeTickFormatterSpec tickFormatterSpec;
-    DateTimeTickProviderSpec tickProviderSpec;
-
-    if (type == ChartType.year) {
-      tickFormatterSpec = AutoDateTimeTickFormatterSpec(
-          month: TimeFormatterSpec(
-        format: 'MMM',
-        transitionFormat: 'MMM',
-      ));
-    }
-
-    if (type == ChartType.month) {
-      tickFormatterSpec = AutoDateTimeTickFormatterSpec(
-          day: TimeFormatterSpec(
-        format: 'dd.MM',
-        transitionFormat: 'dd.MM',
-      ));
-    }
-
-    if (type == ChartType.week) {
-      var format = widget.state.getWeek() == getWeekNumber(DateTime.now())
-          ? 'EE'
-          : 'dd.MM';
-      tickFormatterSpec = AutoDateTimeTickFormatterSpec(
-          day: TimeFormatterSpec(
-        format: format,
-        transitionFormat: format,
-      ));
-      tickProviderSpec = charts.DayTickProviderSpec(increments: [1]);
-    }
-    if (type == ChartType.day) {
-      tickFormatterSpec = charts.AutoDateTimeTickFormatterSpec(
-          hour: new charts.TimeFormatterSpec(
-              format: "HH:mm", transitionFormat: "HH:mm"));
-    }
-
-    return charts.DateTimeAxisSpec(
-        renderSpec: renderSpec,
-        tickFormatterSpec: tickFormatterSpec,
-        tickProviderSpec: tickProviderSpec);
   }
 
   List<charts.Series<PhoneUnlocks, DateTime>> createSeries(

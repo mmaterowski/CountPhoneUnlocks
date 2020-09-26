@@ -1,3 +1,4 @@
+import 'package:date_util/date_util.dart';
 import 'package:rHabbit/utils/date-time-utils.dart';
 
 class RhabbitState {
@@ -80,6 +81,10 @@ class RhabbitState {
 
   int getMonth() {
     return this._monthNumber;
+  }
+
+  String getMonthName() {
+    return DateUtil().month(this._monthNumber);
   }
 
   int getYear() {
