@@ -5,9 +5,11 @@ import 'package:rHabbit/models/chart-type.dart';
 import 'package:rHabbit/models/rhabbit-state.dart';
 import 'package:rHabbit/models/unlock-record.dart';
 import 'package:rHabbit/services/axis-builder-service.dart';
+import 'package:rHabbit/services/chart-data-service.dart';
 import 'package:rHabbit/services/display-period-service.dart';
 import 'package:rHabbit/services/unlock-records-service.dart';
 import 'package:rHabbit/utils/date-time-utils.dart';
+import 'package:rHabbit/utils/debouncer.dart';
 import '../models/phone-unlocks.dart';
 import 'package:charts_flutter/flutter.dart' as charts;
 
@@ -20,6 +22,8 @@ class UnlocksChart extends StatefulWidget {
   final Function(RhabbitState) setRhabbitStateCallback;
   final UnlockRecordsService service = UnlockRecordsService();
   final DisplayPeriodService displayService = DisplayPeriodService();
+  final ChartDataService chartDataService = ChartDataService();
+  final _debouncer = Debouncer(milliseconds: 250);
 
   UnlocksChart({
     Key key,
@@ -29,6 +33,7 @@ class UnlocksChart extends StatefulWidget {
     this.setRhabbitStateCallback,
   }) : super(key: key) {
     this.service.setData(this.unlockData);
+    this.chartDataService.setService(this.service);
   }
 
   @override
@@ -38,6 +43,13 @@ class UnlocksChart extends StatefulWidget {
 class _UnlocksChartState extends State<UnlocksChart> {
   bool _isThereDataMoreDataInFuture = false;
   bool _isThereDataMoreDataInPast = true;
+
+  @protected
+  @mustCallSuper
+  void initState() {
+    super.initState();
+    setPagination();
+  }
 
   void setChartDisplayPeriod({bool increase}) {
     switch (this.widget.chartType) {
@@ -57,18 +69,70 @@ class _UnlocksChartState extends State<UnlocksChart> {
     }
   }
 
-  setForDay(bool increase) {
+  void setPagination() {
+    bool nextEnabled = false;
+    bool previousEnabled = true;
+    var unlockService = widget.service;
+
+    switch (this.widget.chartType) {
+      case ChartType.day:
+        nextEnabled = unlockService.isThereMoreRecordsAfter(
+            widget.state.getDate().add(Duration(days: 1)));
+        previousEnabled =
+            unlockService.isThereMoreRecordsBefore(widget.state.getDate());
+
+        break;
+      case ChartType.week:
+        var endOfThisWeek = getDateByWeekNumber(
+            widget.state.getWeek(), widget.state.getYear(),
+            start: false);
+        nextEnabled = unlockService.isThereMoreRecordsAfter(endOfThisWeek);
+
+        var startOfThisWeek = getDateByWeekNumber(
+            widget.state.getWeek(), widget.state.getYear(),
+            start: true);
+        previousEnabled =
+            unlockService.isThereMoreRecordsBefore(startOfThisWeek);
+        break;
+      case ChartType.month:
+        nextEnabled = unlockService
+            .isThereMoreRecordsAfter(lastDayOfMonth(widget.state.getDate()));
+        previousEnabled = unlockService.isThereMoreRecordsBefore(
+            new DateTime(this.widget.state.getYear(), widget.state.getMonth()));
+        break;
+      case ChartType.year:
+        nextEnabled = widget.service
+            .isThereMoreRecordsAfter(getLastDayOfYear(widget.state.getYear()));
+        previousEnabled = widget.service
+            .isThereMoreRecordsBefore(new DateTime(widget.state.getYear()));
+        break;
+      default:
+        nextEnabled = false;
+        previousEnabled = false;
+    }
+
+    setState(() {
+      _isThereDataMoreDataInFuture = nextEnabled;
+      _isThereDataMoreDataInPast = previousEnabled;
+    });
+  }
+
+  void setForDay(bool increase) {
     increase
         ? widget.state.add(Duration(days: 1))
         : widget.state.subtract(Duration(days: 1));
     this.widget.setRhabbitStateCallback(widget.state);
 
-    setState(() {
-      _isThereDataMoreDataInFuture =
-          widget.service.isThereMoreRecordsAfter(widget.state.getDate());
-      _isThereDataMoreDataInPast =
-          widget.service.isThereMoreRecordsBefore(widget.state.getDate());
-    });
+    setPagination();
+  }
+
+  setForWeek(bool increase) {
+    int newWeekNumber =
+        increase ? widget.state.getWeek() + 1 : widget.state.getWeek() - 1;
+
+    widget.state.setWeek(newWeekNumber);
+    widget.setRhabbitStateCallback(widget.state);
+    setPagination();
   }
 
   setForYear(bool increase) {
@@ -77,80 +141,20 @@ class _UnlocksChartState extends State<UnlocksChart> {
     widget.state.setYear(newYear);
     this.widget.setRhabbitStateCallback(widget.state);
 
-    setState(() {
-      _isThereDataMoreDataInFuture =
-          widget.service.isThereMoreRecordsAfter(getLastDayOfYear(newYear));
-      _isThereDataMoreDataInPast =
-          widget.service.isThereMoreRecordsBefore(new DateTime(newYear));
-    });
+    setPagination();
   }
 
   setForMonth(bool increase) {
     increase ? widget.state.addMonth() : widget.state.subtractMonth();
     this.widget.setRhabbitStateCallback(widget.state);
 
-    setState(() {
-      _isThereDataMoreDataInFuture = widget.service
-          .isThereMoreRecordsAfter(lastDayOfMonth(this.widget.state.getDate()));
-      _isThereDataMoreDataInPast = widget.service.isThereMoreRecordsBefore(
-          new DateTime(
-              this.widget.state.getYear(), this.widget.state.getMonth()));
-    });
-  }
-
-  setForWeek(bool increase) {
-    int newWeekNumber =
-        increase ? widget.state.getWeek() + 1 : widget.state.getWeek() - 1;
-    bool isThereMoreDataInFuture = true;
-    bool isThereMoreDataInPast = true;
-
-    if (increase) {
-      var endOfThisWeek = getDateByWeekNumber(
-          weeknumber: widget.state.getWeek() + 1,
-          year: DateTime.now().year,
-          start: false);
-      if (!widget.service.isThereMoreRecordsAfter(endOfThisWeek)) {
-        isThereMoreDataInFuture = false;
-      }
-    } else {
-      var startOfThisWeek = getDateByWeekNumber(
-          weeknumber: widget.state.getWeek() - 1,
-          year: DateTime.now().year,
-          start: true);
-      if (!widget.service.isThereMoreRecordsBefore(startOfThisWeek)) {
-        isThereMoreDataInPast = false;
-      }
-    }
-
-    widget.state.setWeek(newWeekNumber);
-    widget.setRhabbitStateCallback(widget.state);
-
-    setState(() {
-      _isThereDataMoreDataInFuture = isThereMoreDataInFuture;
-      _isThereDataMoreDataInPast = isThereMoreDataInPast;
-    });
-  }
-
-  List<PhoneUnlocks> buildChartData() {
-    switch (this.widget.chartType) {
-      case ChartType.day:
-        return buildTodaySeries();
-        break;
-      case ChartType.week:
-        return buildWeekSeries();
-        break;
-      case ChartType.month:
-        return buildMonthSeries();
-      case ChartType.year:
-        return buildYearSeries();
-      default:
-        return List<PhoneUnlocks>();
-    }
+    setPagination();
   }
 
   @override
   Widget build(BuildContext context) {
-    List<PhoneUnlocks> data = buildChartData();
+    List<PhoneUnlocks> data =
+        widget.chartDataService.buildChartData(widget.chartType, widget.state);
     List<charts.Series<PhoneUnlocks, DateTime>> series = createSeries(data);
     var axisBuilder = new AxisBuilderService();
     TimeSeriesChart chart = charts.TimeSeriesChart(series,
@@ -258,99 +262,5 @@ class _UnlocksChartState extends State<UnlocksChart> {
         data: unlockData,
       )
     ];
-  }
-
-  List<PhoneUnlocks> buildYearSeries() {
-    List<PhoneUnlocks> data = new List<PhoneUnlocks>();
-    var thisYearRecords = widget.service.groupByYear(DateTime.now().year);
-
-    for (var i = 1; i <= DateTime.monthsPerYear; i++) {
-      if (thisYearRecords.containsKey(i)) {
-        data.add(new PhoneUnlocks(
-            new DateTime(DateTime.now().year, i), thisYearRecords[i].length));
-      }
-    }
-    addEmtyRecordsIfNeeded(data);
-    return data;
-  }
-
-  void addEmtyRecordsIfNeeded(List<PhoneUnlocks> data) {
-    if (data.length == 1) {
-      var date = data.first.timestamp;
-      if (date.month != DateTime.december) {
-        data.add(new PhoneUnlocks(new DateTime(date.year, date.month + 1), 0));
-      }
-      if (date.month != DateTime.january)
-        data.add(new PhoneUnlocks(new DateTime(date.year, date.month - 1), 0));
-    }
-  }
-
-  List<PhoneUnlocks> buildMonthSeries() {
-    List<PhoneUnlocks> data = new List<PhoneUnlocks>();
-    var monthRecords =
-        widget.service.groupByMonth(DateTime.now().month, DateTime.now().year);
-    var lastDayOfTheMonth = lastDayOfMonth(DateTime.now()).day;
-    for (var i = 0; i < lastDayOfTheMonth; i++) {
-      int counts = 0;
-      if (monthRecords.length - i <= 0) {
-        continue;
-      }
-
-      counts = monthRecords[monthRecords.keys.elementAt(i)].length;
-      data.add(new PhoneUnlocks(
-          DateTime.parse(monthRecords.keys.elementAt(i)), counts));
-    }
-    return data;
-  }
-
-  List<PhoneUnlocks> buildWeekSeries() {
-    var data = new List<PhoneUnlocks>();
-    var weekRecords = widget.service.groupByWeek(widget.state.getWeek());
-    for (int i = 0; i < DateTime.daysPerWeek; i++) {
-      if (shouldAddEmptyDay(weekRecords, data, i)) {
-        addEmptyDayRecordOnNextDay(data);
-        continue;
-      }
-      addDayRecord(weekRecords, data, i);
-    }
-    return data;
-  }
-
-  bool shouldAddEmptyDay(Map<String, List<UnlockRecord>> weekRecords,
-      List<PhoneUnlocks> data, int i) {
-    bool noMoreRecordsToIterate = weekRecords.length - i <= 0;
-    return noMoreRecordsToIterate && data.length != 0;
-  }
-
-  void addEmptyDayRecordOnNextDay(List<PhoneUnlocks> data) {
-    var nextDay = data.last.timestamp.add(new Duration(days: 1));
-    data.add(new PhoneUnlocks(nextDay, 0));
-  }
-
-  void addDayRecord(Map<String, List<UnlockRecord>> weekRecords,
-      List<PhoneUnlocks> data, int i) {
-    var counts = weekRecords[weekRecords.keys.elementAt(i)].length;
-    data.add(new PhoneUnlocks(
-        DateTime.parse(weekRecords.keys.elementAt(i)), counts));
-  }
-
-  List<PhoneUnlocks> buildTodaySeries() {
-    List<PhoneUnlocks> data = new List<PhoneUnlocks>();
-    var todayRecords = widget.service.groupByDay(widget.state.getDate());
-    for (var key in todayRecords.keys) {
-      var date = new DateTime(
-          DateTime.now().year, DateTime.now().month, DateTime.now().day, key);
-      data.add(new PhoneUnlocks(date, todayRecords[key].length));
-    }
-
-    if (data.length <= 2) {
-      var lastRecord = data.last.timestamp;
-      if (lastRecord.hour < 24) {
-        var nextHour = new DateTime(lastRecord.year, lastRecord.month,
-            lastRecord.day, lastRecord.hour + 1);
-        data.add(new PhoneUnlocks(nextHour, 0));
-      }
-    }
-    return data;
   }
 }

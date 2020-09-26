@@ -60,10 +60,10 @@ class DisplayPeriodService {
   }
 
   String weekRaw(RhabbitState state) {
-    var weekStart = getDateByWeekNumber(
-        weeknumber: state.getWeek(), year: state.getYear(), start: true);
-    var weekEnd = getDateByWeekNumber(
-        weeknumber: state.getWeek(), year: state.getYear(), start: false);
+    var weekStart =
+        getDateByWeekNumber(state.getWeek(), state.getYear(), start: true);
+    var weekEnd =
+        getDateByWeekNumber(state.getWeek(), state.getYear(), start: false);
     var formattedWeekStart = formatADate(weekStart, 'd MMM');
     var formattedWeekEnd = formatADate(weekEnd, 'd MMM yyyy');
     return formattedWeekStart + " - " + formattedWeekEnd;

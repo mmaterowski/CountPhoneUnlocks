@@ -39,8 +39,7 @@ class RhabbitState {
   }
 
   setWeek(int weekNumber) {
-    var newDate = getDateByWeekNumber(
-        weeknumber: weekNumber, year: this.getYear(), start: true);
+    var newDate = getDateByWeekNumber(weekNumber, this.getYear(), start: true);
 
     this._setDate(newDate);
   }

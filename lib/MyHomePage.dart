@@ -29,7 +29,7 @@ class _MyHomePageState extends State<MyHomePage> {
   static const platform = const MethodChannel('UserActiveChannel');
   List<UnlockRecord> _unlockData = new List<UnlockRecord>();
   ChartType _chartType = ChartType.day;
-  RhabbitState _state = RhabbitState(DateTime.now());
+  RhabbitState _state;
 
   @override
   void initState() {
@@ -59,6 +59,7 @@ class _MyHomePageState extends State<MyHomePage> {
 
     setState(() {
       _unlockData = unlockData;
+      _state = RhabbitState.now();
     });
   }
 
@@ -74,6 +75,7 @@ class _MyHomePageState extends State<MyHomePage> {
 
     setState(() {
       _chartType = type;
+      _state = RhabbitState.now();
     });
   }
 
@@ -88,6 +90,7 @@ class _MyHomePageState extends State<MyHomePage> {
 
     setState(() {
       _chartType = type;
+      _state = RhabbitState.now();
     });
   }
 

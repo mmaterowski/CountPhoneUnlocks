@@ -20,7 +20,7 @@ String formatADate(DateTime date, String format) {
   return formatter.format(date);
 }
 
-DateTime getDateByWeekNumber({int weeknumber, int year, bool start}) {
+DateTime getDateByWeekNumber(int weeknumber, int year, {bool start}) {
   //check if start == true retrun start date of week
   //else return end date
   var days = ((weeknumber - 1) * 7) + (start ? 0 : 6);
